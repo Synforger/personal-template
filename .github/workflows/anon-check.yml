@@ -1,0 +1,52 @@
+name: anon-check
+
+# Public personal repo guard. Runs on every push / PR to catch personal
+# identifiers or prior-employer affiliation that may have slipped past
+# the local pre-commit hook (`.githooks/pre-commit` + `task lint`).
+# The same PCRE pattern lives in `.tooling/local-ci/anon-scan.sh`,
+# so both layers stay semantically identical.
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Scan for personal identifiers
+        shell: bash
+        run: |
+          set -u
+          # Detect personal identifiers / prior-employer org names that
+          # must not appear in committed files. Word boundaries + negative
+          # lookaheads keep false positives (aria-hidden, ark-*, etc.) out.
+          PATTERN='(?i)(\b(okg|haven)\b|arayabrain|\baraya\b|com\.okg\.|\baria\b(?!-)|\bark\b(?!-))'
+
+          matches=$(grep -rEnP \
+              --exclude-dir=.git \
+              --exclude-dir=node_modules \
+              --exclude-dir=dist \
+              --exclude-dir=build \
+              --exclude-dir=.venv \
+              --exclude-dir=venv \
+              --exclude-dir=__pycache__ \
+              --exclude-dir=.next \
+              --exclude='*.lock' \
+              --exclude='package-lock.json' \
+              --exclude='yarn.lock' \
+              --exclude='*.min.js' \
+              --exclude='anon-check.yml' \
+              --exclude='anon-scan.sh' \
+              "$PATTERN" . || true)
+
+          if [ -n "$matches" ]; then
+            echo "$matches"
+            echo ""
+            echo "::error::Personal identifiers detected. Remove or move to gitignored config."
+            exit 1
+          fi
+
+          echo "OK: no personal identifiers found"
