@@ -4,40 +4,65 @@ set -euo pipefail
 # =============================================================================
 # Local Dev Platform - Anonymity Scanner (local)
 # =============================================================================
-# Equivalent of the deprecated `.github/workflows/anon-check.yml`. Scans
-# the repository for personal identifiers and operator-internal stack
-# names that must never appear in committed files. Same PCRE pattern as
-# the old workflow; word boundaries + negative lookaheads keep
-# accessibility attributes (`aria-label`, `aria-hidden`) and npm package
-# names (`aria-query`, `ark-*`) out of the false-positive lane.
+# Scans the repository for personal identifiers and operator-internal stack
+# names that must never appear in committed files.
+#
+# Single source of truth: the forbidden-word list lives in `anon-words.txt`
+# (next to this script), one PCRE fragment per line. This scanner reads that
+# file, strips comments / blank lines, and joins the fragments with `|` to
+# build the (?i) case-insensitive pattern. The GitHub Action
+# (.github/workflows/anon-check.yml) runs THIS SAME script, so the CI and the
+# pre-commit hook can never drift — there is no second copy of the pattern.
+#
+# Word boundaries + negative lookaheads in the word list keep accessibility
+# attributes (`aria-label`, `aria-hidden`) and npm package names (`aria-query`,
+# `ark-*`) out of the false-positive lane.
 #
 # Called from two places:
-#   - .githooks/pre-commit  (= staged-file scan before each commit)
-#   - .tooling/os/<os>/lint.sh  (= full-tree scan via `task lint`)
+#   - .githooks/pre-commit       (= staged-file scan before each commit)
+#   - .tooling/os/<os>/lint.sh   (= full-tree scan via `task lint`)
 #
 # Exit code:
 #   0 = clean
 #   1 = personal identifier found
+#   2 = word list missing / empty (configuration error)
 #
 # Optional env:
-#   ANON_SCAN_PATHS  newline-separated subset of files to scan (used by
-#                    the pre-commit hook to limit the scan to staged
-#                    files). Empty = scan the whole tree.
+#   ANON_SCAN_PATHS  newline-separated subset of files to scan (used by the
+#                    pre-commit hook to limit the scan to staged files).
+#                    Empty = scan the whole tree.
 # =============================================================================
 
-# PCRE pattern. Mirrors the anon-check workflow exactly so the two
-# guards stay semantically identical (commit-time + CI-time).
-# Word boundaries + negative lookaheads keep accessibility attributes
-# (`aria-label`, `aria-hidden`) and npm package names (`aria-query`,
-# `ark-*`) out of the false-positive lane. Prior employer / org names
-# are deliberately included here so a public personal repo never
-# leaks affiliation.
-PATTERN='(?i)(\b(REDACTED|REDACTED)\b|REDACTED|\baraya\b|com\.REDACTED\.|\baria\b(?!-)|\bark\b(?!-))'
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WORDS_FILE="${SCRIPT_DIR}/anon-words.txt"
+
+if [ ! -f "${WORDS_FILE}" ]; then
+    echo "error: word list not found at ${WORDS_FILE}" >&2
+    exit 2
+fi
+
+# Build the PCRE alternation from the word list. Each non-comment, non-blank
+# line is one fragment; the trailing " #..." inline comment and surrounding
+# whitespace are stripped.
+fragments=()
+while IFS= read -r line || [ -n "${line}" ]; do
+    line="${line%%#*}"                                   # drop comments
+    line="$(printf '%s' "${line}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+    [ -z "${line}" ] && continue
+    fragments+=("${line}")
+done < "${WORDS_FILE}"
+
+if [ "${#fragments[@]}" -eq 0 ]; then
+    echo "error: ${WORDS_FILE} contains no patterns" >&2
+    exit 2
+fi
+
+ANON_PATTERN="$(IFS='|'; echo "${fragments[*]}")"
+export ANON_PATTERN
 
 # Files / dirs that legitimately contain string fragments matching the
-# pattern (build artefacts, lockfiles with hash collisions, etc.). The
-# original workflow used grep --exclude-* flags; ripgrep / perl do not,
-# so we filter with a glob list passed to find.
+# pattern (build artefacts, lockfiles, and the policy files that define the
+# pattern itself).
 EXCLUDES=(
     '.git'
     'node_modules'
@@ -53,23 +78,22 @@ EXCLUDE_GLOBS=(
     'package-lock.json'
     'yarn.lock'
     '*.min.js'
-    'anon-check.yml'  # the workflow file is allowed to contain the pattern definition
+    'anon-check.yml'  # the workflow file is allowed to reference the scanner
     'anon-scan.sh'    # this script likewise
-    'README.md'       # workflow README mentions the pattern as documentation
+    'anon-words.txt'  # the word list is the pattern definition itself
+    'README.md'       # the README documents the pattern as policy
 )
 
 scan_with_perl() {
     local file="$1"
-    perl -ne 'BEGIN { $re = qr/(?i)(\b(REDACTED|REDACTED)\b|REDACTED|\baraya\b|com\.REDACTED\.|\baria\b(?!-)|\bark\b(?!-))/ }
+    perl -ne 'BEGIN { $re = qr/(?i)$ENV{ANON_PATTERN}/ }
               if (/$re/) { print "$ARGV:$.:$_"; $found = 1 }
               END { exit($found ? 1 : 0) }' "$file"
 }
 
-# Returns 0 if `basename($1)` is in EXCLUDE_GLOBS, 1 otherwise. Used to
-# keep the scanner's own pattern definition (and the workflow's mirror
-# of it, and any policy README that documents the pattern) out of the
-# false-positive lane both in full-tree scans and in the staged-file
-# mode driven by the pre-commit hook.
+# Returns 0 if `basename($1)` is in EXCLUDE_GLOBS, 1 otherwise. Used to keep
+# the word list / scanner / policy README out of the false-positive lane both
+# in full-tree scans and in the staged-file mode driven by the pre-commit hook.
 is_excluded_basename() {
     local base
     base="$(basename "$1")"
@@ -108,8 +132,7 @@ fi
 
 found=0
 for path in "${scan_paths[@]}"; do
-    # Skip non-text files quickly via the `file` command. perl on a
-    # binary will not match anyway, but skipping is cheaper.
+    # Skip non-text files quickly.
     case "$path" in
         *.png|*.jpg|*.jpeg|*.gif|*.pdf|*.zip|*.gz|*.tar|*.so|*.dylib|*.dll|*.exe|*.bin|*.csv|*.npy|*.ipynb)
             continue
