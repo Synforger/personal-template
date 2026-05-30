@@ -30,13 +30,12 @@ CI (GitHub Actions) は **匿名性チェック 1 本だけ** デフォルト有
 | 匿名性 CI ガード | `.github/workflows/anon-check.yml` | push / PR で全文 anon-scan、 漏れたら CI 赤 |
 | main/develop 直 commit ガード | `.githooks/pre-commit` 内 | 個人リポでは無効化想定だが、 hook を有効にすれば機能する |
 
-匿名性パターン (PCRE):
-```
-(\b(okg|haven)\b|arayabrain|\baraya\b|com\.okg\.|\baria\b(?!-)|\bark\b(?!-))
-```
-
-`.tooling/local-ci/anon-scan.sh` と `.github/workflows/anon-check.yml` で
-**完全に同じパターン**を使う (= 二重実装の semantics drift を防ぐ)。
+匿名性パターンの**真値は `.tooling/local-ci/anon-words.txt`**（禁止ワードを
+1 行 1 PCRE 片で列挙、`#` 始まりの行と空行は無視）。`.tooling/local-ci/anon-scan.sh`
+がこれを読んで `|` 連結した (?i) PCRE を組み、pre-commit hook（staged のみ）と
+`.github/workflows/anon-check.yml`（push / PR で全文）の**両方が同じ scanner を呼ぶ**。
+ワードを足すときは `anon-words.txt` 1 ファイルだけ直せばよく、二重実装の
+semantics drift が構造的に起きない。
 
 ## 言語ごとの追加チェックの足し方
 
