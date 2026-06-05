@@ -26,6 +26,7 @@ CI (GitHub Actions) は **匿名性チェック 1 本だけ** デフォルト有
 | 結合テスト | `task test:integration` | pytest tests/integration |
 | 実行可能 build | `task build:exe` | PyInstaller (Python 案件向け) |
 | API / Web 起動 | `task run:api` / `task run:web` | FastAPI / Sphinx docs preview |
+| docs 鮮度チェック | `task docs:check` | md 内のパス参照 / task 名 / ツリー図 が実態と一致するか機械検証。 統合前に 1 回走らせる (lint には入れない設計) |
 | 匿名性 commit ガード | `.githooks/pre-commit` | staged ファイルだけ anon-scan、 軽量 |
 | 匿名性 CI ガード | `.github/workflows/anon-check.yml` | push / PR で全文 anon-scan、 漏れたら CI 赤 |
 | main/develop 直 commit ガード | `.githooks/pre-commit` 内 | 個人リポでは無効化想定だが、 hook を有効にすれば機能する |
