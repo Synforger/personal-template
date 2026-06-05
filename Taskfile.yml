@@ -92,6 +92,14 @@ tasks:
         bash .tooling/os/{{if eq OS "darwin"}}macos{{else}}ubuntu{{end}}/lint.sh
         {{end}}
 
+  docs:check:
+    desc: Verify docs freshness (paths / task names / tree diagrams vs reality)
+    cmds:
+      # Pre-integration sweep entry point. Not part of `task lint` on
+      # purpose: docs are reconciled once before integration, not on every
+      # dev-loop lint run. Windows needs Git Bash on PATH.
+      - bash .tooling/local-ci/docs-check.sh
+
   # ===========================================================================
   # Test (no sudo)
   # ===========================================================================
