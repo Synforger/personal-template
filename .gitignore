@@ -62,3 +62,6 @@ htmlcov/*
 
 # local AI tooling config
 .claude/settings.local.json
+
+# 個人情報を含む(派生時は手元で作成・.example を参考に)
+.tooling/local-ci/anon-words.txt

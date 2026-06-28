@@ -116,3 +116,11 @@ personal-template/
   `pytest.ini` 等を削除して言語固有設定に置き換える
 - `anon-check.yml` の PCRE パターンは個人公開リポ用に強化済。 派生で別所属
   が増えたら同じパターンに追記する
+
+---
+
+## 派生プロジェクトで使う時の注意
+
+`.tooling/local-ci/anon-words.txt` はリポに含まれない(`.gitignore` 対象)。匿名性チェックを使う場合、`.tooling/local-ci/anon-words.example.txt` を参考に **手元で作成** し、自分の本名・個人メアド・特定情報を1行1語で書く。
+
+**公開リポに個人情報は絶対に含めない**(本テンプレ採用時の最重要設計原則)。
