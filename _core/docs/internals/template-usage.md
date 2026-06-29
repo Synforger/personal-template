@@ -69,4 +69,16 @@ task setup
 
 ## back-port (= 既存 repo へのテンプレ機構持ち込み)
 
-`task install:core` で既存 repo にこのテンプレの `_core/` 機構を後追い install できる予定 (= PR 7 で実装)。
+既存 repo に **後追い install** する手順:
+
+```bash
+cd ~/repos/synforger/personal-template
+
+# _core 機構一式
+task install:core TARGET=~/repos/synforger/my-existing-repo
+
+# 特定言語 overlay
+task install:overlay NAME=rust TARGET=~/repos/synforger/my-existing-repo
+```
+
+衝突は `<name>.tmpl.orig` backup で残し、 上書きしない (= 手動 merge 用)。 詳細は [`install-to-existing.md`](install-to-existing.md) 参照。
