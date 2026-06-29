@@ -83,6 +83,35 @@ tasks:
     cmds:
       - python3 scripts/gen-third-party-notices.py
 
+  audit:
+    desc: Aggregate security audit (anon-scan + gitleaks full history + pip-audit + npm audit + cargo audit)
+    cmds:
+      - bash .tooling/local-ci/audit.sh
+
+  clean:
+    desc: Per-layer clean (LAYER=python|node|rust|swift|kotlin|cs|docs|all, default=all)
+    vars:
+      LAYER: '{{.LAYER | default "all"}}'
+    cmds:
+      - bash .tooling/local-ci/clean.sh {{.LAYER}}
+
+  version:bump:
+    desc: Bump version in bump-targets.yaml + listed files (LEVEL=patch|minor|major, DRY_RUN=1 for plan-only)
+    vars:
+      LEVEL: '{{.LEVEL | default "patch"}}'
+      DRY_RUN: '{{.DRY_RUN | default "0"}}'
+    cmds:
+      - LEVEL={{.LEVEL}} DRY_RUN={{.DRY_RUN}} bash .tooling/local-ci/version-bump.sh
+
+  release:cut:
+    desc: Bump version + commit + tag + push (LEVEL=patch|minor|major, SKIP_PUSH=1 to keep local, DRY_RUN=1 for plan-only)
+    vars:
+      LEVEL: '{{.LEVEL | default "patch"}}'
+      DRY_RUN: '{{.DRY_RUN | default "0"}}'
+      SKIP_PUSH: '{{.SKIP_PUSH | default "0"}}'
+    cmds:
+      - LEVEL={{.LEVEL}} DRY_RUN={{.DRY_RUN}} SKIP_PUSH={{.SKIP_PUSH}} bash .tooling/local-ci/release-cut.sh
+
   setup:branch-protection:
     desc: Setup branch protection rules for the main branch
     cmds:

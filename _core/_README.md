@@ -4,9 +4,10 @@
 
 ## ここに入っているもの
 
-- **`Taskfile.yml`** — core task 群 (= setup / lint / test / build / docs:check / doctor / lint:versions / gen-notices 等の言語非依存 wrapper)
+- **`Taskfile.yml`** — core task 群 (= setup / lint / test / build / docs:check / doctor / lint:versions / gen-notices / audit / clean / version:bump / release:cut 等の言語非依存 wrapper)
 - **`.tooling/versions.yaml`** — toolchain 真値 (= host / 言語 overlay / shared build の floor バージョン、 アルファベット順)
-- **`.tooling/local-ci/`** — anon-scan.sh / docs-check.sh / doctor.sh / lint-versions.sh / setup-lib.sh + setup-lib.ps1 (= bash / PowerShell 共通プリミティブ) / 関連 ignore リスト
+- **`.tooling/bump-targets.yaml`** — project version の真値 (= `current_version`) + bump 時に rewrite する file 一覧。 active overlay が init 時に entry 追加
+- **`.tooling/local-ci/`** — anon-scan.sh / docs-check.sh / doctor.sh / lint-versions.sh / clean.sh / audit.sh / version-bump.sh / release-cut.sh / setup-lib.sh + setup-lib.ps1 (= bash / PowerShell 共通プリミティブ) / 関連 ignore リスト
 - **`.githooks/pre-commit`** — main/develop 直 commit guard + anon-scan + gitleaks secret scan
 - **`.github/`** — ISSUE_TEMPLATE 3 種 + workflows (= anon-check / version-bump)
 - **`scripts/`** — setup-branch-protection.sh / init.sh / gen-third-party-notices.py
