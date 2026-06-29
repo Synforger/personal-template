@@ -12,6 +12,9 @@ gh repo create synforger/<new-project> --template synforger/personal-template --
 cd <new-project>
 task init
 
+# 2a. (推奨) toolchain 診断 = `task doctor` で MISSING / TOO OLD / OK を確認
+task doctor
+
 # 3. パッケージ名 / GitHub URL / Python バージョン等を対話設定
 pip install -r setup-requirements.txt
 python personalize.py

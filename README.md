@@ -11,6 +11,7 @@
 | **ローカル CI 完結** | `task lint` / `task test:unit` / `task docs:check` で品質ガードが手元で全部走る (= GitHub Actions 課金ゼロ運用) |
 | **匿名性ガード** | pre-commit hook + CI workflow で個人名 / 業務識別子の混入を機械検出 |
 | **docs 鮮度ガード** | md 内の path 参照 / `task` 名 / tree 図 が実態と一致するか機械検証 |
+| **toolchain 真値一元化** | `.tooling/versions.yaml` 1 file で host floor を集約、 `task doctor` で MISSING / TOO OLD / OK を診断、 `task lint:versions` で下流 config drift を検知 |
 | **branch protection** | gh CLI で main 保護を 1 発設定 |
 | **対話 personalization** | パッケージ名 / GitHub URL / バージョン等の placeholder を対話的に置換 |
 
