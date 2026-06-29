@@ -68,6 +68,16 @@ tasks:
     cmds:
       - bash .tooling/local-ci/docs-check.sh
 
+  doctor:
+    desc: Preflight diagnostic — report MISSING / TOO OLD / OK for every toolchain entry
+    cmds:
+      - bash .tooling/local-ci/doctor.sh
+
+  lint:versions:
+    desc: Detect downstream toolchain drift vs .tooling/versions.yaml truth
+    cmds:
+      - bash .tooling/local-ci/lint-versions.sh
+
   setup:branch-protection:
     desc: Setup branch protection rules for the main branch
     cmds:
