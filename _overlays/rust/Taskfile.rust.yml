@@ -1,0 +1,45 @@
+# =============================================================================
+# personal-template / Rust overlay Taskfile
+# =============================================================================
+# Rust-specific tasks namespaced under `rust:`. Inline commands; cargo is
+# cross-platform identical (macOS / Ubuntu / Windows).
+# =============================================================================
+
+version: '3'
+
+tasks:
+  setup:
+    desc: Fetch dependencies (= populate target/ cache without building)
+    cmds:
+      - cargo fetch
+
+  update:
+    desc: Update Cargo.lock to latest semver-compatible versions
+    cmds:
+      - cargo update
+
+  lint:
+    desc: Run cargo fmt --check + cargo clippy with -D warnings
+    cmds:
+      - cargo fmt --check
+      - cargo clippy --all-targets -- -D warnings
+
+  test:unit:
+    desc: Run unit tests (= cargo test --lib)
+    cmds:
+      - cargo test --lib
+
+  test:integration:
+    desc: Run integration tests (= tests/ dir)
+    cmds:
+      - cargo test --tests
+
+  build:
+    desc: Release build
+    cmds:
+      - cargo build --release
+
+  run:
+    desc: Run the binary (= meaningful only for binary crates)
+    cmds:
+      - cargo run --release

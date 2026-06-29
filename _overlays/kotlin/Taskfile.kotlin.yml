@@ -1,0 +1,48 @@
+# =============================================================================
+# personal-template / Kotlin overlay Taskfile
+# =============================================================================
+# Kotlin-specific tasks namespaced under `kotlin:`. Inline commands; Gradle
+# wrapper (= `./gradlew`) makes the JVM toolchain version-stable.
+#
+# Note: `./gradlew` requires the wrapper to be present. Run
+# `gradle wrapper --gradle-version 8.5` once after `task init` to generate
+# the wrapper script + gradle/wrapper/ directory.
+# =============================================================================
+
+version: '3'
+
+tasks:
+  setup:
+    desc: Resolve dependencies
+    cmds:
+      - ./gradlew dependencies --refresh-dependencies
+
+  update:
+    desc: Report available dependency updates (= requires versions plugin)
+    cmds:
+      - ./gradlew dependencyUpdates
+
+  lint:
+    desc: Run ktlint + detekt (= plugins must be applied in build.gradle.kts)
+    cmds:
+      - ./gradlew ktlintCheck detekt
+
+  test:unit:
+    desc: Run unit tests
+    cmds:
+      - ./gradlew test
+
+  test:integration:
+    desc: Run integration tests (= integrationTest source set when defined)
+    cmds:
+      - ./gradlew integrationTest
+
+  build:
+    desc: Compile + assemble
+    cmds:
+      - ./gradlew build
+
+  run:
+    desc: Run main class (= application plugin must be applied)
+    cmds:
+      - ./gradlew run
