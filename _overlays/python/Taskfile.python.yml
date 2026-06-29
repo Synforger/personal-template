@@ -62,6 +62,11 @@ tasks:
         bash .tooling/os/{{if eq OS "darwin"}}macos{{else}}ubuntu{{end}}/python/test-integration.sh
         {{end}}
 
+  build:
+    desc: Build the python deliverable (= aliases py:build:exe for symmetry with other overlays)
+    cmds:
+      - task: build:exe
+
   build:exe:
     desc: Build standalone executable with PyInstaller
     cmds:
@@ -71,6 +76,11 @@ tasks:
         {{else}}
         bash .tooling/os/{{if eq OS "darwin"}}macos{{else}}ubuntu{{end}}/python/build-exe.sh
         {{end}}
+
+  run:
+    desc: Run the python application (= aliases py:run:api for symmetry with other overlays)
+    cmds:
+      - task: run:api
 
   run:api:
     desc: Start FastAPI server

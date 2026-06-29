@@ -76,7 +76,14 @@ fi
 
 # ---- pip-audit (python overlay) -------------------------------------------
 
-if [ -f "pyproject.toml" ] || [ -f "_overlays/python/pyproject.toml" ]; then
+# NOTE: every language probe below looks ONLY at the post-init layout
+# (= project root or its known sub-dirs like frontend/). `_overlays/<lang>/`
+# paths are intentionally NOT scanned — at template state those dirs hold
+# scaffold material, not an active project, and running e.g. `npm audit`
+# against them fails with ENOLOCK because no lockfile is generated until
+# the overlay is promoted via `task init` and `task setup` runs.
+
+if [ -f "pyproject.toml" ]; then
     if check_command pip-audit; then
         run_section "pip-audit" pip-audit
     elif check_command pip; then
@@ -85,13 +92,13 @@ if [ -f "pyproject.toml" ] || [ -f "_overlays/python/pyproject.toml" ]; then
         skip_section "pip-audit" "neither pip nor pip-audit available"
     fi
 else
-    skip_section "pip-audit" "python overlay not active (= no pyproject.toml)"
+    skip_section "pip-audit" "python overlay not active (= no pyproject.toml at root)"
 fi
 
 # ---- npm audit (node overlay) ---------------------------------------------
 
 NODE_DIR=""
-for c in "${PROJECT_ROOT}" "${PROJECT_ROOT}/frontend" "${PROJECT_ROOT}/_overlays/node"; do
+for c in "${PROJECT_ROOT}" "${PROJECT_ROOT}/frontend"; do
     if [ -f "${c}/package.json" ]; then NODE_DIR="${c}"; break; fi
 done
 if [ -n "${NODE_DIR}" ]; then
@@ -102,24 +109,20 @@ if [ -n "${NODE_DIR}" ]; then
         skip_section "npm audit" "npm not installed"
     fi
 else
-    skip_section "npm audit" "node overlay not active (= no package.json)"
+    skip_section "npm audit" "node overlay not active (= no package.json at root)"
 fi
 
 # ---- cargo audit (rust overlay) -------------------------------------------
 
-RUST_DIR=""
-for c in "${PROJECT_ROOT}" "${PROJECT_ROOT}/_overlays/rust"; do
-    if [ -f "${c}/Cargo.toml" ]; then RUST_DIR="${c}"; break; fi
-done
-if [ -n "${RUST_DIR}" ]; then
+if [ -f "${PROJECT_ROOT}/Cargo.toml" ]; then
     if check_command cargo-audit || check_command cargo; then
-        run_section "cargo audit (${RUST_DIR#${PROJECT_ROOT}/})" \
-            bash -c "cd '${RUST_DIR}' && cargo audit"
+        run_section "cargo audit" \
+            bash -c "cd '${PROJECT_ROOT}' && cargo audit"
     else
         skip_section "cargo audit" "neither cargo nor cargo-audit installed"
     fi
 else
-    skip_section "cargo audit" "rust overlay not active (= no Cargo.toml)"
+    skip_section "cargo audit" "rust overlay not active (= no Cargo.toml at root)"
 fi
 
 printf '\n' >&2
