@@ -44,7 +44,7 @@ source "${SCRIPT_DIR}/setup-lib.sh"
 
 WORDS_FILE="${SCRIPT_DIR}/anon-words.txt"
 if [ ! -f "${WORDS_FILE}" ]; then
-    log_fail "anon-words.txt が見つからない (${WORDS_FILE}): REDACTED 真値から sync してください (bash ${SCRIPT_DIR}/anon-sync-truth.sh)"
+    log_fail "anon-words.txt が見つからない (${WORDS_FILE}): operator masterから sync してください (bash ${SCRIPT_DIR}/anon-sync-truth.sh)"
     exit 2
 fi
 
