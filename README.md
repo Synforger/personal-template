@@ -13,6 +13,9 @@
 | **secret ガード** | pre-commit hook に gitleaks 同梱、 API key / password / private key の流入を機械検出 |
 | **docs 鮮度ガード** | md 内の path 参照 / `task` 名 / tree 図 / git conflict marker (4 軸) が実態と一致するか機械検証 |
 | **toolchain 真値一元化** | `.tooling/versions.yaml` 1 file で host floor を集約、 `task doctor` で MISSING / TOO OLD / OK を診断、 `task lint:versions` で下流 config drift を検知 |
+| **集約 security audit** | `task audit` で anon-scan + gitleaks 全履歴 + pip-audit + npm audit + cargo audit を 1 発実行、 不在 tool は skip |
+| **per-layer clean** | `task clean LAYER=<layer>` で言語別 build artefact + cache を選択削除 (= python/node/rust/swift/kotlin/cs/docs/all) |
+| **release driver** | `task release:cut LEVEL=patch\|minor\|major` で version bump + commit + tag + push を 1 発、 DRY_RUN=1 で plan 確認 |
 | **公開 OSS 必須要件** | `SECURITY.md` / `ROADMAP.md` / `THIRD_PARTY_NOTICES.md` template 同梱、 後者は `task gen-notices` で自動生成 |
 | **branch protection** | gh CLI で main 保護を 1 発設定 |
 | **対話 personalization** | パッケージ名 / GitHub URL / バージョン等の placeholder を対話的に置換 |
