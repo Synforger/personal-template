@@ -4,10 +4,11 @@
 
 ## ここに入っているもの
 
-- **`Taskfile.yml`** — core task 群 (= setup / lint / test / build / docs:check 等の言語非依存 wrapper)
+- **`Taskfile.yml`** — core task 群 (= setup / lint / test / build / docs:check / doctor / lint:versions 等の言語非依存 wrapper)
+- **`.tooling/versions.yaml`** — toolchain 真値 (= host / 言語 overlay / shared build の floor バージョン、 アルファベット順)
+- **`.tooling/local-ci/`** — anon-scan.sh / docs-check.sh / doctor.sh / lint-versions.sh / setup-lib.sh + setup-lib.ps1 (= bash / PowerShell 共通プリミティブ) / 関連 ignore リスト
 - **`.githooks/pre-commit`** — main/develop 直 commit guard + anon-scan
 - **`.github/`** — ISSUE_TEMPLATE 3 種 + workflows (= anon-check / version-bump)
-- **`.tooling/local-ci/`** — anon-scan.sh / docs-check.sh / 関連 ignore リスト
 - **`scripts/`** — setup-branch-protection.sh / init.sh
 - **`docs/`** — 利用者/contributor 2 層構造の placeholder
 - **`personalize.py`** — パッケージ名 / GitHub URL 等の対話 rename

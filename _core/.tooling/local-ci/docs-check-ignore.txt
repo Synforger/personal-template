@@ -12,3 +12,4 @@ task version:bump   # workflows/README: "derive per project when needed" example
 task release:cut    # same — intentionally hypothetical, not a stale reference
 task install:core   # future back-port mechanism (planned in PR 7), referenced in README roadmap
 task install:overlay  # same — multi-language back-port task planned for PR 7
+.tooling/versions.yaml  # README documents post-init layout; the file lives under _core/.tooling/ at template state and gets promoted to .tooling/ by `task init`
