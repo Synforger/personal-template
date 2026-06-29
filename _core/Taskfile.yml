@@ -78,6 +78,11 @@ tasks:
     cmds:
       - bash .tooling/local-ci/lint-versions.sh
 
+  gen-notices:
+    desc: Regenerate THIRD_PARTY_NOTICES.md from the installed dep tree (python + node + rust)
+    cmds:
+      - python3 scripts/gen-third-party-notices.py
+
   setup:branch-protection:
     desc: Setup branch protection rules for the main branch
     cmds:
