@@ -46,7 +46,7 @@ FILES_TO_REMOVE = {
 
 PATHS_TO_IGNORE = {
     REPO_BASE / ".git",
-    REPO_BASE / "docs" / "source" / "_static" / "favicon.ico",
+    REPO_BASE / "docs" / "logo.png",
     REPO_BASE / "data",
 }
 
