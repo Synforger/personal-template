@@ -86,9 +86,7 @@ EXCLUDE_GLOBS=(
     'Cargo.lock'      # rust lockfile — pinned versions only, no secrets
     '*.min.js'
     'anon-check.yml'  # the workflow file is allowed to reference the scanner
-    'anon-scan.sh'    # this script likewise
     'anon-words.txt'  # the word list is the pattern definition itself
-    'README.md'       # the README documents the pattern as policy
     'config.json'     # gitignored per-deriver config (= config.example.json is public)
 )
 
@@ -122,8 +120,20 @@ if [ -n "${ANON_SCAN_PATHS:-}" ]; then
         is_excluded_basename "$p" && continue
         scan_paths+=("$p")
     done <<< "${ANON_SCAN_PATHS}"
+elif command -v git >/dev/null 2>&1 && git rev-parse --git-dir >/dev/null 2>&1; then
+    # Full-tree mode in a git repo: scan only tracked files. This respects
+    # `.gitignore` automatically — runtime data dirs (= backend/data/,
+    # secrets/, logs/, .venv/) that hold real personal strings never enter
+    # the scan, which would otherwise produce noise + leak local paths into
+    # the scan output itself.
+    while IFS= read -r p; do
+        [ -z "$p" ] && continue
+        [ -f "$p" ] || continue
+        is_excluded_basename "$p" && continue
+        scan_paths+=("$p")
+    done < <(git ls-files)
 else
-    # Build a find command with all the excludes.
+    # Non-git fallback: walk the working tree with EXCLUDES.
     find_args=(.)
     for dir in "${EXCLUDES[@]}"; do
         find_args+=(-not -path "*/${dir}/*")
@@ -132,7 +142,6 @@ else
         find_args+=(-not -name "${glob}")
     done
     find_args+=(-type f)
-    # macOS / Linux portable: read NUL-delimited paths into the array.
     while IFS= read -r -d '' p; do
         scan_paths+=("$p")
     done < <(find "${find_args[@]}" -print0)
