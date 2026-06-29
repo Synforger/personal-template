@@ -18,7 +18,21 @@ includes:
   py:
     taskfile: ./Taskfile.python.yml
     optional: true
-  # Future overlays plug in here verbatim (= node / rust / swift / kotlin / cs).
+  node:
+    taskfile: ./Taskfile.node.yml
+    optional: true
+  rust:
+    taskfile: ./Taskfile.rust.yml
+    optional: true
+  swift:
+    taskfile: ./Taskfile.swift.yml
+    optional: true
+  kotlin:
+    taskfile: ./Taskfile.kotlin.yml
+    optional: true
+  cs:
+    taskfile: ./Taskfile.csharp.yml
+    optional: true
 
 tasks:
   default:
@@ -116,3 +130,11 @@ tasks:
     desc: Setup branch protection rules for the main branch
     cmds:
       - bash scripts/setup-branch-protection.sh
+
+  init:github:
+    desc: Apply post-template GitHub settings (= secret scanning, PVR, merge config, branch protection)
+    vars:
+      OWNER: '{{.OWNER | default ""}}'
+      REPO: '{{.REPO | default ""}}'
+    cmds:
+      - OWNER={{.OWNER}} REPO={{.REPO}} bash scripts/post-init-github-settings.sh

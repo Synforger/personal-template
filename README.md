@@ -72,15 +72,24 @@ personal-template/
         └── .tooling/os/<os>/python/
 ```
 
-## 言語選択 (= 現状)
+## 言語選択 (= 6 overlay すべて active)
 
-現 revision は **Python overlay 単独**。 他言語 overlay は今後の PR で追加予定:
+`task init` で対話 multiselect、 または `OVERLAYS=` で非対話指定:
 
-- node / rust / swift / kotlin / csharp (= 全部 library 型 default)
-- `task init` の multiselect 化 + GitHub settings 1 発復元 (= `post-init-github-settings.sh`)
-- 既存 repo への back-port (= `task install:core` / `task install:overlay name=<lang>`)
+| overlay | prefix | 内容 |
+|---|---|---|
+| python | `py:`     | pyproject + pytest + pyinstaller |
+| node   | `node:`   | package.json + tsconfig + vitest + eslint |
+| rust   | `rust:`   | Cargo.toml + lib.rs + cargo test/fmt/clippy |
+| swift  | `swift:`  | SwiftPM library |
+| kotlin | `kotlin:` | Gradle Kotlin library + JUnit 5 |
+| csharp | `cs:`     | .NET 8 class library + xUnit |
 
-詳細ロードマップは [`_overlays/_README.md`](_overlays/_README.md) 参照。
+`task init:github` で template 化で引き継がれない GitHub settings (= secret scanning / PVR / merge config / branch protection) を gh CLI 経由で 1 発復元。
+
+既存 repo への back-port (= `task install:core` / `task install:overlay name=<lang>`) は PR 7 で実装予定。
+
+詳細は [`_overlays/_README.md`](_overlays/_README.md) 参照。
 
 ## 設計思想
 

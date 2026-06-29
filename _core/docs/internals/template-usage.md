@@ -50,8 +50,23 @@ task setup
 
 ## 言語選択 (= 現状)
 
-現 revision は **Python overlay 強制**。 他言語 (= node / rust / swift / kotlin / csharp) overlay は今後の PR で追加予定。 multiselect 化されるまでは Python 前提のリポでのみ派生してください。
+`task init` は **6 言語 overlay の multiselect** に対応:
+
+| key | prefix | 概要 |
+|---|---|---|
+| python | `py:`     | Python library + CLI (= `src/my_package/`) |
+| node   | `node:`   | Node.js / TypeScript library + CLI (= `src/index.ts`) |
+| rust   | `rust:`   | Rust library (= `src/lib.rs`、 binary 化は派生で `[[bin]]` 追加) |
+| swift  | `swift:`  | SwiftPM library (= `Sources/MySwiftLib/`、 iOS app は Xcode template 別) |
+| kotlin | `kotlin:` | Gradle Kotlin library (= `src/main/kotlin/`、 Android app は AS template 別) |
+| csharp | `cs:`     | .NET class library (= `src/*.csproj`、 Unity/WPF は別 boilerplate) |
+
+`task init` で対話的に複数選択、 または `task init OVERLAYS=python,node,rust` で非対話実行。
+
+## GitHub settings 1 発復元
+
+`task init:github` で template 化で引き継がれない GitHub settings (= secret scanning / PVR / merge config / branch protection) を gh CLI 経由で自動適用。 残 manual TODO (= Non-provider patterns / CodeQL UI) は script 末尾で URL 付き表示。
 
 ## back-port (= 既存 repo へのテンプレ機構持ち込み)
 
-`task install:core` で既存 repo にこのテンプレの `_core/` 機構を後追い install できる予定 (= 今後の PR で実装)。
+`task install:core` で既存 repo にこのテンプレの `_core/` 機構を後追い install できる予定 (= PR 7 で実装)。
