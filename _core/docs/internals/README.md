@@ -30,6 +30,11 @@
 - `task docs:check` — md 内 path 参照 / `task` 名 / tree 図 / git conflict marker (4 軸) が実態と一致するか機械検証
 - `task doctor` — `.tooling/versions.yaml` を元に MISSING / TOO OLD / OK を診断
 - `task lint:versions` — 下流 config (= `pyproject.toml` `requires-python` 等) が真値と乖離してないか機械検証
+- `task audit` — anon-scan + gitleaks full history + pip-audit + npm audit + cargo audit を集約 (= 各 tool は不在なら skip)
+- `task clean LAYER=<layer>` — layer 別 build artefact / cache 削除 (= python/node/rust/swift/kotlin/cs/docs/all)
+- `task version:bump LEVEL=<level>` — `.tooling/bump-targets.yaml` の `current_version` を bump + 列挙 file を rewrite (LEVEL=patch|minor|major、 DRY_RUN=1 で plan 確認)
+- `task release:cut LEVEL=<level>` — version:bump + git commit + tag + push 1 発 (= SKIP_PUSH=1 で local 留め、 DRY_RUN=1 で plan 確認)
+- `task gen-notices` — THIRD_PARTY_NOTICES.md を installed dep tree から再生成
 - `task setup:branch-protection` — main 保護を gh CLI で設定
 
 詳細は `_core/.tooling/local-ci/` 内のスクリプトを参照。
