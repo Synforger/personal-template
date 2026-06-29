@@ -14,6 +14,11 @@ set -euo pipefail
 #      (a tree block is only verified when its root line resolves to an
 #       existing directory; trees describing planned/future layouts are
 #       skipped automatically because their root does not exist yet)
+#   G. git conflict markers (= ^<<<<<<<, ^>>>>>>>) anywhere in a tracked
+#      .md, including inside fenced code blocks. Squash-merge mishaps tend
+#      to leave these in docs and they go unnoticed for ages. =======
+#      is intentionally NOT scanned because it overlaps with markdown h1
+#      underlines and would false-positive.
 #
 # What it cannot check: prose claims about behaviour. Those are covered by
 # the review pass before integration, not by this script.
@@ -118,6 +123,10 @@ def path_exists(cand, md_dir):
 
 TREE_CHARS = ("├", "└", "│")
 PLACEHOLDER = re.compile(r"[<>{}*$]|\.\.\.|…")
+# Conflict-marker shapes that mdoc never legitimately contains. We deliberately
+# skip `=======` because that pattern overlaps with markdown h1 underlines, but
+# `<<<<<<<` and `>>>>>>>` are unambiguous merge mishap fingerprints.
+CONFLICT_RE = re.compile(r"^(<{7}|>{7})( .*)?$")
 
 task_names = set(filter(None, os.environ.get("TASK_NAMES", "").splitlines()))
 findings = []
@@ -131,6 +140,14 @@ for md in md_files():
     in_fence = False
     fence_block = []          # (lineno, text) of current fenced block
     for lineno, line in enumerate(lines, 1):
+        # ---- check G: git conflict markers (= squash/merge mishap) ----
+        # Run before fence handling so markers inside code blocks also fire.
+        if CONFLICT_RE.match(line):
+            if not is_ignored(line.strip()):
+                findings.append(
+                    f"{rel_md}:{lineno}: git conflict marker: "
+                    f"{line[:40]}")
+            continue
         if line.lstrip().startswith("```"):
             if in_fence:
                 # ---- check C: tree diagrams in the closed block ----
