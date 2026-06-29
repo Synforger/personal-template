@@ -245,6 +245,60 @@ def patch_root_taskfile(selected: Sequence[str]) -> None:
     print(f"  rewrote Taskfile.yml includes for overlays: {', '.join(selected) or '(none)'}")
 
 
+# Wrapper tasks that fan out to every selected overlay's same-named task.
+# Order here matches the order they appear in the template-state Taskfile.yml
+# so the rewrite stays a pure cmds-list substitution.
+WRAPPER_TASKS = ("setup", "update", "lint", "test:unit", "test:integration", "build", "run")
+
+
+def patch_wrapper_tasks(selected: Sequence[str]) -> None:
+    """
+    Rewrite each fan-out wrapper task's cmds block in the root Taskfile.yml
+    so it fans out to every selected overlay. At template state each wrapper
+    has a single `- task: py:<name>` stub; init replaces that with one
+    `- task: <prefix>:<name>` line per selected overlay (preserving order).
+
+    Zero overlays selected = the wrappers are stubbed with a comment that
+    explains why they no-op. The fan-out semantics rely on each overlay
+    defining all of WRAPPER_TASKS — see _overlays/<lang>/Taskfile.<lang>.yml.
+    """
+    taskfile = REPO_ROOT / "Taskfile.yml"
+    if not taskfile.exists():
+        return
+    text = taskfile.read_text()
+
+    overlay_prefixes = {k: pfx for k, _, pfx, *_ in OVERLAY_REGISTRY}
+    prefixes = [overlay_prefixes[k] for k in selected]
+
+    for wrapper in WRAPPER_TASKS:
+        # Match the wrapper block:
+        #   "  <wrapper>:\n    desc: ...\n    cmds:\n      - task: py:<wrapper>\n"
+        # The cmds line is exactly one entry at template state. We replace
+        # just the cmds line set, keeping the desc + headers intact.
+        wrapper_re = re.escape(wrapper)
+        pattern = re.compile(
+            rf"(^  {wrapper_re}:\n(?:    [^\n]+\n)*    cmds:\n)"
+            rf"((?:      - task: [a-z:]+\n)+)",
+            re.MULTILINE,
+        )
+        if prefixes:
+            new_cmds = "".join(f"      - task: {pfx}:{wrapper}\n" for pfx in prefixes)
+        else:
+            new_cmds = (
+                "      - echo 'no language overlay selected at init; "
+                f"`task {wrapper}` is a no-op (run task <prefix>:{wrapper} directly)'\n"
+            )
+        text, n = pattern.subn(rf"\1{new_cmds}", text, count=1)
+        if n == 0:
+            print(f"  warn: wrapper '{wrapper}' not found in Taskfile.yml (= layout drift?)")
+
+    taskfile.write_text(text)
+    print(
+        f"  rewrote {len(WRAPPER_TASKS)} fan-out wrapper(s) for overlays: "
+        f"{', '.join(selected) or '(none — wrappers stubbed)'}"
+    )
+
+
 def patch_bump_targets(selected: Sequence[str]) -> None:
     """
     Replace the existing python-only `targets:` block in bump-targets.yaml
@@ -300,6 +354,9 @@ def main() -> int:
 
     print("==> Patching root Taskfile.yml includes")
     patch_root_taskfile(selected)
+
+    print("==> Patching root Taskfile.yml fan-out wrappers")
+    patch_wrapper_tasks(selected)
 
     print("==> Patching bump-targets.yaml")
     patch_bump_targets(selected)
