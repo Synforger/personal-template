@@ -1,0 +1,74 @@
+# =============================================================================
+# personal-template / core Taskfile
+# =============================================================================
+# This Taskfile defines language-neutral tasks (anonymity / docs / hooks /
+# GitHub settings) plus delegating wrappers that fan out to whichever language
+# overlays are active.
+#
+# At template state (= before `task init`) this file lives under `_core/`.
+# After `task init` runs in a derived repo, this file is moved to the repo
+# root and the chosen overlays' `Taskfile.<lang>.yml` files are included from
+# the same root. Includes are marked `optional` so missing overlays do not
+# error out — they just contribute no tasks.
+# =============================================================================
+
+version: '3'
+
+includes:
+  py:
+    taskfile: ./Taskfile.python.yml
+    optional: true
+  # Future overlays plug in here verbatim (= node / rust / swift / kotlin / cs).
+
+tasks:
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list
+
+  # ---------------------------------------------------------------------------
+  # Language-neutral wrappers — delegate to the active overlay's task.
+  # The init script wires the cmds list to whichever overlays are active.
+  # ---------------------------------------------------------------------------
+  setup:
+    desc: Initial setup (delegates to active overlays)
+    cmds:
+      - task: py:setup
+
+  lint:
+    desc: Run lint across active overlays
+    cmds:
+      - task: py:lint
+
+  test:unit:
+    desc: Run unit tests across active overlays
+    cmds:
+      - task: py:test:unit
+
+  test:integration:
+    desc: Run integration tests across active overlays
+    cmds:
+      - task: py:test:integration
+
+  build:exe:
+    desc: Build standalone executable (overlay-dependent)
+    cmds:
+      - task: py:build:exe
+
+  run:api:
+    desc: Start API server (overlay-dependent)
+    cmds:
+      - task: py:run:api
+
+  # ---------------------------------------------------------------------------
+  # Language-neutral quality gates (no delegation).
+  # ---------------------------------------------------------------------------
+  docs:check:
+    desc: Verify docs freshness (paths / task names / tree diagrams vs reality)
+    cmds:
+      - bash .tooling/local-ci/docs-check.sh
+
+  setup:branch-protection:
+    desc: Setup branch protection rules for the main branch
+    cmds:
+      - bash scripts/setup-branch-protection.sh

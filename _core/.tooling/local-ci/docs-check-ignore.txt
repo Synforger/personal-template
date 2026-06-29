@@ -10,3 +10,5 @@
 
 task version:bump   # workflows/README: "derive per project when needed" example
 task release:cut    # same — intentionally hypothetical, not a stale reference
+task install:core   # future back-port mechanism (planned in PR 7), referenced in README roadmap
+task install:overlay  # same — multi-language back-port task planned for PR 7
