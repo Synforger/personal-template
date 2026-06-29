@@ -2,16 +2,16 @@
 
 派生プロジェクトの言語ごとに**選択的に root に展開する**機構置き場。 `task init` で選んだ言語の overlay 中身が repo root に昇格し、 選ばなかった overlay と `_overlays/` 自体は削除される。
 
-## 現状の overlay 構成
+## 現状の overlay 構成 (= 全 6 言語 active、 library 型統一)
 
-| overlay | 状態 | 中身 |
+| overlay | prefix | 中身 |
 |---|---|---|
-| [`python/`](python/) | active | pyproject.toml / pytest / flake8 / pyinstaller / src/my_package / Sphinx 非依存 |
-| `node/` | 未配備 | 今後の PR で追加 (= package.json / eslint / vite 等) |
-| `rust/` | 未配備 | 今後の PR で追加 (= Cargo.toml / src/lib.rs 等) |
-| `swift/` | 未配備 | 今後の PR で追加 (= SwiftPM Package.swift 等) |
-| `kotlin/` | 未配備 | 今後の PR で追加 (= Gradle build.gradle.kts 等) |
-| `csharp/` | 未配備 | 今後の PR で追加 (= .NET class library) |
+| [`python/`](python/) | `py:`     | pyproject.toml / pytest / flake8 / pyinstaller / src/my_package/ (Sphinx 非依存) |
+| [`node/`](node/)     | `node:`   | package.json / tsconfig / eslint + prettier / vitest / src/index.ts (TypeScript デフォルト) |
+| [`rust/`](rust/)     | `rust:`   | Cargo.toml / src/lib.rs / tests/integration_test.rs (cargo test/fmt/clippy) |
+| [`swift/`](swift/)   | `swift:`  | SwiftPM Package.swift / Sources/MySwiftLib/ / Tests/MySwiftLibTests/ (XCTest) |
+| [`kotlin/`](kotlin/) | `kotlin:` | Gradle Kotlin DSL / src/main/kotlin/ / src/test/kotlin/ (JUnit 5) |
+| [`csharp/`](csharp/) | `cs:`     | .NET 8 class library / xUnit tests / global.json (SDK pin) |
 
 ## overlay の設計原則
 

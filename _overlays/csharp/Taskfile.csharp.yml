@@ -1,0 +1,49 @@
+# =============================================================================
+# personal-template / C# overlay Taskfile
+# =============================================================================
+# C#-specific tasks namespaced under `cs:`. Inline commands; dotnet CLI is
+# cross-platform identical (macOS / Ubuntu / Windows).
+# =============================================================================
+
+version: '3'
+
+tasks:
+  setup:
+    desc: Restore NuGet packages
+    cmds:
+      - dotnet restore
+
+  update:
+    desc: Report + apply available package updates (= requires dotnet-outdated-tool)
+    cmds:
+      - |
+        if command -v dotnet-outdated >/dev/null 2>&1; then
+          dotnet outdated -u
+        else
+          echo "warning: dotnet-outdated not installed (dotnet tool install --global dotnet-outdated-tool); skipped"
+        fi
+
+  lint:
+    desc: Verify formatting via dotnet format --verify-no-changes
+    cmds:
+      - dotnet format --verify-no-changes
+
+  test:unit:
+    desc: Run unit tests (= tests with [Trait("Category","Unit")])
+    cmds:
+      - dotnet test --filter "Category=Unit"
+
+  test:integration:
+    desc: Run integration tests (= tests with [Trait("Category","Integration")])
+    cmds:
+      - dotnet test --filter "Category=Integration"
+
+  build:
+    desc: Release build
+    cmds:
+      - dotnet build --configuration Release
+
+  run:
+    desc: Run the executable project (= when src/ has a console / web app)
+    cmds:
+      - dotnet run --project src/MyCsharpLib.csproj
