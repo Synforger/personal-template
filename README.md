@@ -100,4 +100,4 @@ personal-template/
 
 ## License
 
-Apache-2.0 (= [`_core/LICENSE`](_core/LICENSE))
+Apache-2.0 (= [`LICENSE`](LICENSE))
