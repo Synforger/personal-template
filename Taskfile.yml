@@ -20,3 +20,20 @@ tasks:
       OVERLAYS: '{{.OVERLAYS | default ""}}'
     cmds:
       - OVERLAYS={{.OVERLAYS}} python3 _core/scripts/init.py
+
+  install:core:
+    desc: Install _core machinery into another existing repo (= TARGET=/path, optional DRY_RUN=1)
+    vars:
+      TARGET: '{{.TARGET}}'
+      DRY_RUN: '{{.DRY_RUN | default "0"}}'
+    cmds:
+      - TARGET={{.TARGET}} DRY_RUN={{.DRY_RUN}} bash _core/scripts/install-core.sh
+
+  install:overlay:
+    desc: Install a single language overlay into another existing repo (= NAME=<lang> TARGET=/path)
+    vars:
+      NAME: '{{.NAME}}'
+      TARGET: '{{.TARGET}}'
+      DRY_RUN: '{{.DRY_RUN | default "0"}}'
+    cmds:
+      - DRY_RUN={{.DRY_RUN}} bash _core/scripts/install-overlay.sh {{.NAME}} {{.TARGET}}

@@ -10,7 +10,7 @@
 - **`.tooling/local-ci/`** — anon-scan.sh / docs-check.sh / doctor.sh / lint-versions.sh / clean.sh / audit.sh / version-bump.sh / release-cut.sh / setup-lib.sh + setup-lib.ps1 (= bash / PowerShell 共通プリミティブ) / 関連 ignore リスト
 - **`.githooks/pre-commit`** — main/develop 直 commit guard + anon-scan + gitleaks secret scan
 - **`.github/`** — ISSUE_TEMPLATE 3 種 + workflows (= anon-check / version-bump)
-- **`scripts/`** — setup-branch-protection.sh / init.sh / gen-third-party-notices.py
+- **`scripts/`** — setup-branch-protection.sh / init.py / gen-third-party-notices.py / post-init-github-settings.sh / install-core.sh / install-overlay.sh
 - **`docs/`** — 利用者/contributor 2 層構造 (= README + setup/ + ops/ + reference/ + internals/)
 - **`SECURITY.md`** — vulnerability 報告手順 + threat model + audit log template
 - **`ROADMAP.md`** — 利用者向け「使える / 開発中 / 採用しない」 一覧 template

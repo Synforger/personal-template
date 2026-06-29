@@ -87,7 +87,7 @@ personal-template/
 
 `task init:github` で template 化で引き継がれない GitHub settings (= secret scanning / PVR / merge config / branch protection) を gh CLI 経由で 1 発復元。
 
-既存 repo への back-port (= `task install:core` / `task install:overlay name=<lang>`) は PR 7 で実装予定。
+既存 repo への back-port は `task install:core TARGET=<path>` で `_core/` 機構を、 `task install:overlay NAME=<lang> TARGET=<path>` で特定言語 overlay を、 後追い install。 衝突は `*.tmpl.orig` backup で保護、 詳細は [`_core/docs/internals/install-to-existing.md`](_core/docs/internals/install-to-existing.md) 参照。
 
 詳細は [`_overlays/_README.md`](_overlays/_README.md) 参照。
 
