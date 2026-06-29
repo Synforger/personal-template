@@ -72,16 +72,24 @@ EXCLUDES=(
     'venv'
     '__pycache__'
     '.next'
+    'logs'             # runtime log dir (= gitignored) — local PATH / sid noise
+    'target'           # rust build artefacts
+    '.gradle'          # kotlin build artefacts
+    'obj'              # csharp build artefacts (= dotnet)
+    'bin'              # csharp build artefacts (= dotnet)
+    'DerivedData'      # swift / Xcode build artefacts
 )
 EXCLUDE_GLOBS=(
     '*.lock'
     'package-lock.json'
     'yarn.lock'
+    'Cargo.lock'      # rust lockfile — pinned versions only, no secrets
     '*.min.js'
     'anon-check.yml'  # the workflow file is allowed to reference the scanner
     'anon-scan.sh'    # this script likewise
     'anon-words.txt'  # the word list is the pattern definition itself
     'README.md'       # the README documents the pattern as policy
+    'config.json'     # gitignored per-deriver config (= config.example.json is public)
 )
 
 scan_with_perl() {
