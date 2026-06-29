@@ -34,7 +34,13 @@ set -euo pipefail
 # =============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+# Resolve the repo root regardless of whether this script lives at
+# `.tooling/local-ci/` (post-init layout) or `_core/.tooling/local-ci/`
+# (template-state layout, before `task init` promotes _core to root).
+case "${SCRIPT_DIR}" in
+    */_core/.tooling/local-ci) PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)" ;;
+    *)                         PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"   ;;
+esac
 cd "${PROJECT_ROOT}"
 
 if ! command -v python3 >/dev/null 2>&1; then
@@ -47,6 +53,16 @@ fi
 TASK_NAMES=""
 if command -v task >/dev/null 2>&1; then
     TASK_NAMES="$(task --list-all --silent 2>/dev/null || true)"
+    # Template state: collect names from staging Taskfiles as well, so docs
+    # written against the post-init layout do not fire spurious "unknown
+    # task" hits when this script runs from the template root.
+    for tf in _core/Taskfile.yml _overlays/*/Taskfile.*.yml; do
+        [ -f "$tf" ] || continue
+        more_names="$(task --list-all --silent --taskfile "$tf" 2>/dev/null || true)"
+        if [ -n "${more_names}" ]; then
+            TASK_NAMES="${TASK_NAMES}"$'\n'"${more_names}"
+        fi
+    done
 else
     echo "warning: task binary not found; task-name check skipped" >&2
 fi
@@ -57,8 +73,16 @@ import os, re, sys, fnmatch
 
 ROOT = os.getcwd()
 EXCLUDE_DIRS = {".git", "node_modules", "dist", "build", ".venv", "venv",
-                "__pycache__", ".next", ".tooling"}
+                "__pycache__", ".next", ".tooling",
+                # Template staging dirs: contents are scanned only after
+                # `task init` promotes them to the repo root.
+                "_core", "_overlays"}
+# Look for the ignore file in either the post-init layout (.tooling/local-ci/)
+# or the template-state layout (_core/.tooling/local-ci/).
 IGNORE_FILE = os.path.join(ROOT, ".tooling", "local-ci", "docs-check-ignore.txt")
+if not os.path.isfile(IGNORE_FILE):
+    IGNORE_FILE = os.path.join(ROOT, "_core", ".tooling", "local-ci",
+                               "docs-check-ignore.txt")
 
 ignores = []
 if os.path.isfile(IGNORE_FILE):

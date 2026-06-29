@@ -1,25 +1,9 @@
 # =============================================================================
-# Local Dev Platform - Taskfile
+# personal-template / root Taskfile (= template state)
 # =============================================================================
-# This is the unified entry point for all development tasks.
-# Human, AI, and CI should use these task commands.
-#
-# Prerequisites:
-#   npm install -g @go-task/cli
-#
-# Usage:
-#   task --list      # Show available tasks
-#   task setup       # Initial setup (admin rights allowed)
-#   task update      # Update dependencies
-#   task run:api     # Start API server
-#   task run:web     # Start web/frontend server
-#   task lint        # Run lint checks
-#   task test:unit   # Run unit tests
-#
-# Rules:
-#   - NO `develop` task (scope too broad)
-#   - NO `source .venv/bin/activate` from Task (human-only UX)
-#   - NO sudo in run/test/lint (only setup allowed)
+# At template state only `task init` is exposed. After init the real Taskfile
+# from `_core/Taskfile.yml` lands here and the full `task --list` becomes
+# available (= setup / lint / test / build / docs:check / py:* etc.).
 # =============================================================================
 
 version: '3'
@@ -30,122 +14,7 @@ tasks:
     cmds:
       - task --list
 
-  # ===========================================================================
-  # Setup (admin rights allowed - apt/brew/winget)
-  # ===========================================================================
-  setup:
-    desc: Initial setup (OS tools, .venv, dependencies, git hooks)
+  init:
+    desc: Initialize this template for a new project (= promotes _core + chosen overlays to repo root)
     cmds:
-      - |
-        {{if eq OS "windows"}}
-        powershell -ExecutionPolicy Bypass -File .tooling/os/windows/setup.ps1
-        {{else}}
-        bash .tooling/os/{{if eq OS "darwin"}}macos{{else}}ubuntu{{end}}/setup.sh
-        {{end}}
-
-  # ===========================================================================
-  # Update (no sudo - assumes .venv/node_modules exist)
-  # ===========================================================================
-  update:
-    desc: Update dependencies (Python and Node.js)
-    cmds:
-      - |
-        {{if eq OS "windows"}}
-        powershell -ExecutionPolicy Bypass -File .tooling/os/windows/update.ps1
-        {{else}}
-        bash .tooling/os/{{if eq OS "darwin"}}macos{{else}}ubuntu{{end}}/update.sh
-        {{end}}
-
-  # ===========================================================================
-  # Run tasks (no sudo)
-  # ===========================================================================
-  run:api:
-    desc: Start API server (FastAPI)
-    cmds:
-      - |
-        {{if eq OS "windows"}}
-        powershell -ExecutionPolicy Bypass -File .tooling/os/windows/run-api.ps1
-        {{else}}
-        bash .tooling/os/{{if eq OS "darwin"}}macos{{else}}ubuntu{{end}}/run-api.sh
-        {{end}}
-
-  run:web:
-    desc: Start web/frontend server (Sphinx docs preview)
-    cmds:
-      - |
-        {{if eq OS "windows"}}
-        powershell -ExecutionPolicy Bypass -File .tooling/os/windows/run-web.ps1
-        {{else}}
-        bash .tooling/os/{{if eq OS "darwin"}}macos{{else}}ubuntu{{end}}/run-web.sh
-        {{end}}
-
-  # ===========================================================================
-  # Quality (no sudo)
-  # ===========================================================================
-  lint:
-    desc: Run lint and autoformat (for AI/CI)
-    cmds:
-      - |
-        {{if eq OS "windows"}}
-        powershell -ExecutionPolicy Bypass -File .tooling/os/windows/lint.ps1
-        {{else}}
-        bash .tooling/os/{{if eq OS "darwin"}}macos{{else}}ubuntu{{end}}/lint.sh
-        {{end}}
-
-  docs:check:
-    desc: Verify docs freshness (paths / task names / tree diagrams vs reality)
-    cmds:
-      # Pre-integration sweep entry point. Not part of `task lint` on
-      # purpose: docs are reconciled once before integration, not on every
-      # dev-loop lint run. Windows needs Git Bash on PATH.
-      - bash .tooling/local-ci/docs-check.sh
-
-  # ===========================================================================
-  # Test (no sudo)
-  # ===========================================================================
-  test:unit:
-    desc: Run unit tests
-    cmds:
-      - |
-        {{if eq OS "windows"}}
-        powershell -ExecutionPolicy Bypass -File .tooling/os/windows/test-unit.ps1
-        {{else}}
-        bash .tooling/os/{{if eq OS "darwin"}}macos{{else}}ubuntu{{end}}/test-unit.sh
-        {{end}}
-
-  test:integration:
-    desc: Run integration tests
-    cmds:
-      - |
-        {{if eq OS "windows"}}
-        powershell -ExecutionPolicy Bypass -File .tooling/os/windows/test-integration.ps1
-        {{else}}
-        bash .tooling/os/{{if eq OS "darwin"}}macos{{else}}ubuntu{{end}}/test-integration.sh
-        {{end}}
-
-  # ===========================================================================
-  # Build tasks (no sudo)
-  # ===========================================================================
-  build:exe:
-    desc: Build standalone executable using PyInstaller
-    cmds:
-      - |
-        {{if eq OS "windows"}}
-        powershell -ExecutionPolicy Bypass -File .tooling/os/windows/build-exe.ps1
-        {{else}}
-        bash .tooling/os/{{if eq OS "darwin"}}macos{{else}}ubuntu{{end}}/build-exe.sh
-        {{end}}
-
-  # ===========================================================================
-  # Utility tasks (no sudo)
-  # ===========================================================================
-  setup:branch-protection:
-    desc: Setup branch protection rules for main/develop branches
-    cmds:
-      - |
-        {{if eq OS "windows"}}
-        echo "Branch protection setup is not supported on Windows"
-        exit 1
-        {{else}}
-        bash scripts/setup-branch-protection.sh
-        {{end}}
+      - bash _core/scripts/init.sh
