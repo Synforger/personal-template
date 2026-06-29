@@ -101,18 +101,21 @@ check_command() { command -v "$1" >/dev/null 2>&1; }
 
 # get_version <name>
 # Prints the binary's semver string (= "X.Y" or "X.Y.Z"), empty on miss.
+# Every probe runs under LANG=C / LC_ALL=C so localised binaries (= e.g.
+# Homebrew bash outputs Japanese "バージョン" when LANG=ja_JP.UTF-8) still
+# produce the English label form the regexes expect.
 get_version() {
     local name="$1" out=""
     case "${name}" in
-        bash)   out="$(bash --version 2>/dev/null | head -1 | sed -nE 's/.*version ([0-9]+\.[0-9]+(\.[0-9]+)?).*/\1/p')" ;;
-        git)    out="$(git --version 2>/dev/null | sed -nE 's/.*git version ([0-9]+\.[0-9]+(\.[0-9]+)?).*/\1/p')" ;;
-        python) out="$(python3 --version 2>&1 | sed -nE 's/Python ([0-9]+\.[0-9]+(\.[0-9]+)?).*/\1/p')" ;;
-        node)   out="$(node --version 2>/dev/null | sed -nE 's/^v?([0-9]+\.[0-9]+(\.[0-9]+)?).*/\1/p')" ;;
-        rust)   out="$(rustc --version 2>/dev/null | sed -nE 's/^rustc ([0-9]+\.[0-9]+(\.[0-9]+)?).*/\1/p')" ;;
-        swift)  out="$(swift --version 2>/dev/null | head -1 | sed -nE 's/.*Swift version ([0-9]+\.[0-9]+(\.[0-9]+)?).*/\1/p')" ;;
-        kotlin) out="$(kotlin -version 2>&1 | sed -nE 's/.*Kotlin version ([0-9]+\.[0-9]+(\.[0-9]+)?).*/\1/p' | head -1)" ;;
-        cmake)  out="$(cmake --version 2>/dev/null | head -1 | sed -nE 's/cmake version ([0-9]+\.[0-9]+(\.[0-9]+)?).*/\1/p')" ;;
-        cs|dotnet) out="$(dotnet --version 2>/dev/null | sed -nE 's/^([0-9]+\.[0-9]+(\.[0-9]+)?).*/\1/p')" ;;
+        bash)   out="$(LANG=C LC_ALL=C bash --version 2>/dev/null | head -1 | sed -nE 's/.*version ([0-9]+\.[0-9]+(\.[0-9]+)?).*/\1/p')" ;;
+        git)    out="$(LANG=C LC_ALL=C git --version 2>/dev/null | sed -nE 's/.*git version ([0-9]+\.[0-9]+(\.[0-9]+)?).*/\1/p')" ;;
+        python) out="$(LANG=C LC_ALL=C python3 --version 2>&1 | sed -nE 's/Python ([0-9]+\.[0-9]+(\.[0-9]+)?).*/\1/p')" ;;
+        node)   out="$(LANG=C LC_ALL=C node --version 2>/dev/null | sed -nE 's/^v?([0-9]+\.[0-9]+(\.[0-9]+)?).*/\1/p')" ;;
+        rust)   out="$(LANG=C LC_ALL=C rustc --version 2>/dev/null | sed -nE 's/^rustc ([0-9]+\.[0-9]+(\.[0-9]+)?).*/\1/p')" ;;
+        swift)  out="$(LANG=C LC_ALL=C swift --version 2>/dev/null | head -1 | sed -nE 's/.*Swift version ([0-9]+\.[0-9]+(\.[0-9]+)?).*/\1/p')" ;;
+        kotlin) out="$(LANG=C LC_ALL=C kotlin -version 2>&1 | sed -nE 's/.*Kotlin version ([0-9]+\.[0-9]+(\.[0-9]+)?).*/\1/p' | head -1)" ;;
+        cmake)  out="$(LANG=C LC_ALL=C cmake --version 2>/dev/null | head -1 | sed -nE 's/cmake version ([0-9]+\.[0-9]+(\.[0-9]+)?).*/\1/p')" ;;
+        cs|dotnet) out="$(LANG=C LC_ALL=C dotnet --version 2>/dev/null | sed -nE 's/^([0-9]+\.[0-9]+(\.[0-9]+)?).*/\1/p')" ;;
         *)      out="" ;;
     esac
     printf '%s' "${out}"
