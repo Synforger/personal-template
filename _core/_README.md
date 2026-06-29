@@ -17,7 +17,6 @@
 - **`THIRD_PARTY_NOTICES.md`** — OSS dep snapshot (= `task gen-notices` で自動生成)
 - **`personalize.py`** — パッケージ名 / GitHub URL 等の対話 rename
 - **`setup-requirements.txt`** — personalize.py の依存 (click + rich)
-- **`LICENSE`** — Apache-2.0
 - **`.gitignore`** — 共通 ignore (= anon-words.txt + 一般的 build artifact)
 - **`.vscode/`** — editor 設定
 
