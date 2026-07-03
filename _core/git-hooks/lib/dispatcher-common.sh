@@ -80,3 +80,29 @@ dispatcher::locate_anon_scanner() {
         printf '%s' "${scanner}"
     fi
 }
+
+# Locate the repo-local deep audit scanner (anon-audit-deep.sh). Emits the
+# path on stdout when present, nothing otherwise. Callers decide whether an
+# absent scanner is fatal.
+dispatcher::locate_deep_scanner() {
+    local repo_root
+    repo_root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+    [ -n "${repo_root}" ] || return 0
+
+    local scanner="${repo_root}/.tooling/local-ci/anon-audit-deep.sh"
+    if [ -f "${scanner}" ]; then
+        printf '%s' "${scanner}"
+    fi
+}
+
+# Return the name of the default branch (best effort, no origin fetch).
+# Emits the branch name on stdout; falls back to "main" if nothing resolves.
+dispatcher::default_branch() {
+    local ref
+    ref="$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null || true)"
+    if [ -n "${ref}" ]; then
+        printf '%s' "${ref#origin/}"
+        return 0
+    fi
+    printf 'main'
+}
