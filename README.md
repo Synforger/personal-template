@@ -9,7 +9,7 @@
 | カテゴリ | 中身 |
 |---|---|
 | **ローカル CI 完結** | `task lint` / `task test:unit` / `task docs:check` で品質ガードが手元で全部走る (= GitHub Actions 課金ゼロ運用) |
-| **匿名性ガード** | dispatcher hooks (= pre-commit / commit-msg / pre-push) + `task audit:deep` で個人名 / 業務識別子の混入を機械検出 (= 語リストは非公開、 CI には置かない設計) |
+| **匿名性ガード** | [guard-dispatcher](https://github.com/Synforger/guard-dispatcher) (= マシン全体の hooks 関所) が commit / push / PR 境界で個人名 / 業務識別子の混入を機械検出。 本 template は repo 固有 hook (= branch guard + gitleaks) だけを持つ |
 | **secret ガード** | pre-commit hook に gitleaks 同梱、 API key / password / private key の流入を機械検出 |
 | **docs 鮮度ガード** | md 内の path 参照 / `task` 名 / tree 図 / git conflict marker (4 軸) が実態と一致するか機械検証 |
 | **toolchain 真値一元化** | `.tooling/versions.yaml` 1 file で host floor を集約、 `task doctor` で MISSING / TOO OLD / OK を診断、 `task lint:versions` で下流 config drift を検知 |
@@ -52,16 +52,14 @@ personal-template/
 │   ├── _README.md
 │   ├── .gitignore / .vscode/
 │   ├── Taskfile.yml              # core task 定義 (= 派生後 root Taskfile.yml になる)
-│   ├── .githooks/pre-commit      # repo-local hook (= dispatcher から委譲される側)
-│   ├── git-hooks/                # global hooks dispatcher (= pre-commit / commit-msg / pre-push
-│   │   │                         #   + doctor.sh + install.sh、 マシン全体の関所)
-│   │   └── lib/dispatcher-common.sh
+│   ├── .githooks/pre-commit      # repo-local hook (= branch guard + gitleaks、 anon baseline は
+│   │                             #   guard-dispatcher が AND 実行)
 │   ├── .github/
 │   │   ├── ISSUE_TEMPLATE/
 │   │   └── workflows/version-bump.yml
-│   ├── .tooling/local-ci/        # anon-scan / anon-fix / anon-audit-deep / anon-sync-truth /
-│   │                             #   docs-check / doctor / audit / clean / lint-versions /
-│   │                             #   version-bump / release-cut / setup-lib
+│   ├── .tooling/local-ci/        # docs-check / doctor / audit / clean / lint-versions /
+│   │                             #   version-bump / release-cut / setup-lib (= anon 系 scanner
+│   │                             #   は guard-dispatcher 所管)
 │   ├── docs/                     # 利用者/contributor 2 層構造 placeholder
 │   ├── scripts/                  # init.py / install-core.sh / install-overlay.sh /
 │   │                             #   post-init-github-settings.sh / setup-branch-protection.sh /
