@@ -34,6 +34,9 @@ Every hook follows the same three-step logic:
 2. Otherwise, classify the repo by `origin` URL:
    - **synforger** — a Synforger GitHub org repo: enforce the baseline:
      - `pre-commit` runs `.tooling/local-ci/anon-scan.sh` on staged files.
+     - `commit-msg` feeds the pending message file to
+       `.tooling/local-ci/anon-scan.sh` (ANON_SCAN_PATHS mode), so
+       identifiers cannot leak through commit messages either.
      - `pre-push` parses stdin ref ranges and runs
        `.tooling/local-ci/anon-audit-deep.sh --range <remote>..<local>`
        on every outgoing branch. New-branch pushes fall back to
@@ -42,8 +45,6 @@ Every hook follows the same three-step logic:
    - **no-remote** — treated as "might become synforger", fail-safe.
    - **other** — no-op. Personal, third-party, and unrelated work repos
      are unaffected.
-3. `commit-msg` currently no-ops after delegation. The commit-message
-   scan lands in a follow-up PR (package A-4 of the anon-defence rework).
 
 ## Install
 
@@ -79,7 +80,7 @@ override still pointing at `.githooks` and bypassing the global
 enforcement point.
 
 ```sh
-~/.git-hooks/doctor.sh ~/repos/synforger/*
+~/.git-hooks/doctor.sh <projects-root>/*
 ```
 
 Reports the global hooksPath state, the presence and executability of
