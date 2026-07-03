@@ -139,10 +139,16 @@ if [ -z "${RANGE}" ]; then
 fi
 
 # --- source 2: git history blob ---
-# full mode = 全 history、 range mode = push 対象 range のみ
-printf '\n=== source 2/11: git history blob (= 全 commit の全 diff) ===\n' >&2
+# full mode = 全 history の全 diff (= 削除行も対象、 「履歴に残っているか」 が主題)。
+# range mode = これから公開される「新規内容」 のみ = 追加行 (+) と新パス (+++)。
+#   削除行 (-) / context 行を含めると「既公開の leak を除去する commit」 が
+#   自分の削除 diff で検出され、 修正 PR が構造的に push 不能になるため除外。
+#   range 内で追加→削除されたものは追加時の + 行で検出されるので漏れない。
+printf '
+=== source 2/11: git history blob (= 全 commit の全 diff) ===
+' >&2
 if [ -n "${RANGE}" ]; then
-    hits=$(git log "${RANGE}" -p 2>/dev/null | scan_perl)
+    hits=$(git log "${RANGE}" -p 2>/dev/null | grep -E '^\+' | scan_perl)
 else
     hits=$(git log --all -p 2>/dev/null | scan_perl)
 fi
