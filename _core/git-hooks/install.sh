@@ -29,8 +29,9 @@ mkdir -p "${TARGET_DIR}"
 
 # Replace any prior entries — a plain overwrite is safer than trying to
 # preserve unknown state, since the target is a dispatcher owned by this
-# script.
-for entry in pre-commit commit-msg pre-push lib; do
+# script. doctor.sh is not a git hook but symlinking it here lets it be
+# invoked as `~/.git-hooks/doctor.sh` from anywhere.
+for entry in pre-commit commit-msg pre-push lib doctor.sh; do
     src="${SCRIPT_DIR}/${entry}"
     dst="${TARGET_DIR}/${entry}"
 
@@ -49,7 +50,7 @@ done
 # Ensure hook executables are, in fact, executable in the source tree —
 # ln -s does not fix mode bits, and a freshly cloned checkout may have
 # lost the +x bit if the user re-created files via editor.
-chmod +x "${SCRIPT_DIR}/pre-commit" "${SCRIPT_DIR}/commit-msg" "${SCRIPT_DIR}/pre-push"
+chmod +x "${SCRIPT_DIR}/pre-commit" "${SCRIPT_DIR}/commit-msg" "${SCRIPT_DIR}/pre-push" "${SCRIPT_DIR}/doctor.sh"
 
 git config --global core.hooksPath "${TARGET_DIR}"
 

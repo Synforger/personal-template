@@ -17,11 +17,12 @@ that missing setup surfaces as a failed commit rather than a silent gap.
 ```
 _core/git-hooks/
 ├── pre-commit          — dispatcher (staged-file scan on Synforger repos)
-├── commit-msg          — dispatcher (delegate-only for now)
+├── commit-msg          — dispatcher (message-file scan on Synforger repos)
 ├── pre-push            — dispatcher (push-range deep scan on Synforger repos)
 ├── lib/
 │   └── dispatcher-common.sh
-└── install.sh
+├── install.sh
+└── doctor.sh           — diagnoses unarmed hook state across repos
 ```
 
 ## Behaviour
@@ -68,3 +69,23 @@ git -C <repo> config --unset core.hooksPath
 
 The dispatcher will delegate to that repo's `.githooks/<hook>` on its
 behalf, so nothing observable changes for the repo itself.
+
+## Doctor
+
+`doctor.sh` diagnoses the exact unarmed-repo state that motivated this
+dispatcher in the first place — global `core.hooksPath` reverting to
+`.git/hooks` after a fresh clone, or a per-repo `core.hooksPath`
+override still pointing at `.githooks` and bypassing the global
+enforcement point.
+
+```sh
+~/.git-hooks/doctor.sh ~/repos/synforger/*
+```
+
+Reports the global hooksPath state, the presence and executability of
+each dispatcher hook, and, per repo: classification (`synforger` /
+`other` / `no-remote`), whether a local `core.hooksPath` override is
+bypassing the dispatcher, and whether the local anon toolkit is
+installed. Exits non-zero if any Synforger (or fail-safe no-remote)
+repo is missing enforcement — wire it into your shell startup, a
+`task doctor`, or a cron sweep to catch drift early.
