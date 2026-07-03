@@ -9,7 +9,7 @@
 | カテゴリ | 中身 |
 |---|---|
 | **ローカル CI 完結** | `task lint` / `task test:unit` / `task docs:check` で品質ガードが手元で全部走る (= GitHub Actions 課金ゼロ運用) |
-| **匿名性ガード** | pre-commit hook + CI workflow で個人名 / 業務識別子の混入を機械検出 |
+| **匿名性ガード** | dispatcher hooks (= pre-commit / commit-msg / pre-push) + `task audit:deep` で個人名 / 業務識別子の混入を機械検出 (= 語リストは非公開、 CI には置かない設計) |
 | **secret ガード** | pre-commit hook に gitleaks 同梱、 API key / password / private key の流入を機械検出 |
 | **docs 鮮度ガード** | md 内の path 参照 / `task` 名 / tree 図 / git conflict marker (4 軸) が実態と一致するか機械検証 |
 | **toolchain 真値一元化** | `.tooling/versions.yaml` 1 file で host floor を集約、 `task doctor` で MISSING / TOO OLD / OK を診断、 `task lint:versions` で下流 config drift を検知 |
@@ -58,7 +58,7 @@ personal-template/
 │   │   └── lib/dispatcher-common.sh
 │   ├── .github/
 │   │   ├── ISSUE_TEMPLATE/
-│   │   └── workflows/anon-check.yml + version-bump.yml
+│   │   └── workflows/version-bump.yml
 │   ├── .tooling/local-ci/        # anon-scan / anon-fix / anon-audit-deep / anon-sync-truth /
 │   │                             #   docs-check / doctor / audit / clean / lint-versions /
 │   │                             #   version-bump / release-cut / setup-lib
