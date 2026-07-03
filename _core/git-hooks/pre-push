@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# =============================================================================
+# Global pre-push dispatcher
+# =============================================================================
+# Delegates to `.githooks/pre-push` when present. The push-range deep scan
+# (package A-2) will replace this stub with a real implementation that parses
+# stdin ref ranges and runs the repo's anon-audit-deep against the outgoing
+# commit range.
+# =============================================================================
+set -eu
+
+# shellcheck source=lib/dispatcher-common.sh
+. "$(dirname "$0")/lib/dispatcher-common.sh"
+
+dispatcher::delegate_if_present "pre-push" "$@"
+
+exit 0

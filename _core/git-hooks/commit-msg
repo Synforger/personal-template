@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# =============================================================================
+# Global commit-msg dispatcher
+# =============================================================================
+# Delegates to `.githooks/commit-msg` when present. No baseline enforcement
+# yet — the message-level anon scan lands in a follow-up PR (package A-4).
+# =============================================================================
+set -eu
+
+# shellcheck source=lib/dispatcher-common.sh
+. "$(dirname "$0")/lib/dispatcher-common.sh"
+
+dispatcher::delegate_if_present "commit-msg" "$@"
+
+exit 0
