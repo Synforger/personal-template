@@ -12,7 +12,7 @@
 # Usage:
 #   _core/git-hooks/doctor.sh                       # scan ~/.git-hooks + CWD
 #   _core/git-hooks/doctor.sh <repo>... [<repo>...] # scan the given repos
-#   _core/git-hooks/doctor.sh --glob '[REDACTED]/synforger/*'   # shell glob
+#   _core/git-hooks/doctor.sh --glob '<projects-root>/*'     # shell glob
 #
 # Exit code:
 #   0 — nothing wrong (dispatcher installed globally + every scanned repo is
@@ -55,6 +55,16 @@ check_global() {
             findings=$((findings + 1))
         fi
     done
+
+    # Machine axis: the strongest hooks are useless without the operator
+    # master word list — a machine can be "armed" and still scan nothing.
+    local truth="${ANON_TRUTH_PATH:-${HOME}/.config/anon-words/master.txt}"
+    if [ -f "${truth}" ]; then
+        printf '  %s✓%s operator master present (%s)\n' "${GRN}" "${NC}" "${truth}"
+    else
+        printf '  %s✗%s operator master missing (%s) — run bootstrap-machine.sh\n' "${RED}" "${NC}" "${truth}"
+        findings=$((findings + 1))
+    fi
 }
 
 check_repo() {
@@ -100,6 +110,21 @@ check_repo() {
         ok=0
     fi
 
+    # Freshness: a stale repo word list silently weakens every scan. Compare
+    # against the operator master when both exist; warn (not fail) on drift.
+    local truth="${ANON_TRUTH_PATH:-${HOME}/.config/anon-words/master.txt}"
+    local repo_words="${repo}/.tooling/local-ci/anon-words.txt"
+    if [ -f "${truth}" ] && [ -f "${repo_words}" ]; then
+        if ! diff -q "${truth}" "${repo_words}" >/dev/null 2>&1; then
+            printf '\n    %s!%s anon-words.txt is stale vs operator master — run .tooling/local-ci/anon-sync-truth.sh' "${YEL}" "${NC}"
+            ok=0
+        fi
+    elif [ -f "${truth}" ] && [ ! -f "${repo_words}" ] && [ "${kind}" != "other" ]; then
+        printf '\n    %s✗%s anon-words.txt missing — run .tooling/local-ci/anon-sync-truth.sh' "${RED}" "${NC}"
+        findings=$((findings + 1))
+        ok=0
+    fi
+
     if [ "${ok}" -eq 1 ]; then
         printf ' %s✓ armed%s\n' "${GRN}" "${NC}"
     else
@@ -117,7 +142,7 @@ resolve_targets() {
         if [ "${arg}" = "--glob" ]; then
             continue
         fi
-        # Expand shell glob (`[REDACTED]/synforger/*`) — leave literal paths alone.
+        # Expand shell glob (`<projects-root>/*`) — leave literal paths alone.
         for expanded in ${arg}; do
             [ -e "${expanded}" ] && printf '%s\n' "${expanded}"
         done
