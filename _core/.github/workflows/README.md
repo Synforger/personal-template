@@ -12,9 +12,7 @@ public repo.
 
 ## What is enabled
 
-| Workflow file     | Trigger                              | Purpose                                                                                |
-|-------------------|--------------------------------------|----------------------------------------------------------------------------------------|
-| `anon-check.yml`  | `push` (any branch) + `pull_request` | PCRE scan for personal identifiers. Same pattern as `.tooling/local-ci/anon-scan.sh`. |
+(none — the anonymity scan is local-only by design; see below.)
 
 That's it. No matrix tests, no release builds, no version bump
 workflow. Those concerns belong to local `task` commands; see the
@@ -27,7 +25,7 @@ top-level `README.md` for the catalogue.
 | Unit tests          | `task test:unit`                                                   |
 | Integration tests   | `task test:integration`                                            |
 | Lint + format       | `task lint` (black, flake8, anonymity scan)                        |
-| Anonymity check     | `task lint` + `.githooks/pre-commit` (mirror of `anon-check.yml`)  |
+| Anonymity check     | dispatcher hooks (pre-commit / commit-msg / pre-push) + `task audit:deep` |
 | Dependency updates  | manual `pip list --outdated` / `pnpm outdated` / equivalent        |
 | Version bump        | derive a `task version:bump` per project when needed               |
 | Release packaging   | derive a `task release:cut` per project when needed                |
@@ -44,17 +42,16 @@ Add workflows only when:
 
 For most cases the answer is "do it locally via `task` instead."
 
-## Why anon-check is on CI as well as the pre-commit hook
+## Why the anonymity scan is local-only
 
-The hook scans only **staged** files so commits stay fast. The CI
-scans the **whole tree** on every push, which catches:
+The word list is private operator data and is never committed, so CI
+has nothing meaningful to scan against — a CI job would either run
+with an empty placeholder (always green, pure theatre) or require
+publishing the very list the scan exists to protect.
 
-- files that were committed before the hook was installed,
-- files staged via `git commit --no-verify`,
-- branch overlap where a clean local branch picks up dirty content
-  from a merge.
+Coverage that used to be claimed by CI is provided locally instead:
 
-Two layers with the same PCRE pattern keep semantics aligned. The
-pattern lives in two places (`.tooling/local-ci/anon-scan.sh` and
-this workflow) on purpose — both are minimal and easy to keep in
-sync.
+- fresh clones / pre-hook history: `task audit:deep` (full-history mode),
+- `--no-verify` bypasses: the global dispatcher runs regardless of
+  repo-local hook state,
+- push boundaries: the pre-push dispatcher deep-scans the outgoing range.
