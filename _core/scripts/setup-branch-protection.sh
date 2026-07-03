@@ -4,15 +4,16 @@ set -e
 # Setup branch protection using GitHub Rulesets
 # Usage: ./scripts/setup-branch-protection.sh
 #
-# Creates two rulesets:
-#   - Protect main: 1 approval required
-#   - Protect develop: 0 approvals required (optional review)
+# Single-maintainer public-OSS profile:
+#   - main only (feature -> main, two-tier flow; no develop branch)
+#   - PR required, 0 approvals (= self-merge allowed, but always via PR)
+#   - no required status checks (= quality gates are local: task lint /
+#     task test:unit / dispatcher hooks; CI is intentionally not a gate)
+#   - deletion + force-push blocked; admin bypass kept for emergencies
 
 OWNER="${GITHUB_OWNER:-$(gh repo view --json owner -q .owner.login)}"
 REPO="${GITHUB_REPO:-$(gh repo view --json name -q .name)}"
 
-# GitHub Actions App ID (https://github.com/apps/github-actions)
-GITHUB_ACTIONS_APP_ID=15368
 # Repository Role ID for Admin (RepositoryRole type)
 REPOSITORY_ADMIN_ROLE_ID=5
 
@@ -70,18 +71,6 @@ create_or_update_ruleset() {
         "require_last_push_approval": false,
         "required_review_thread_resolution": false
       }
-    },
-    {
-      "type": "required_status_checks",
-      "parameters": {
-        "strict_required_status_checks_policy": true,
-        "required_status_checks": [
-          {"context": "build (3.10, src)", "integration_id": ${GITHUB_ACTIONS_APP_ID}},
-          {"context": "build (3.10, flat)", "integration_id": ${GITHUB_ACTIONS_APP_ID}},
-          {"context": "build (3.13, src)", "integration_id": ${GITHUB_ACTIONS_APP_ID}},
-          {"context": "build (3.13, flat)", "integration_id": ${GITHUB_ACTIONS_APP_ID}}
-        ]
-      }
     }
   ],
   "bypass_actors": [
@@ -106,11 +95,24 @@ EOF
   echo ""
 }
 
-# Create ruleset for main branch (1 approval required)
-create_or_update_ruleset "Protect main" "refs/heads/main" 1
+# Remove a ruleset if it exists (used for retired rulesets, e.g. develop).
+remove_ruleset_if_present() {
+  local ruleset_name="$1"
+  local ruleset_id
+  ruleset_id=$(gh api "repos/${OWNER}/${REPO}/rulesets" --jq ".[] | select(.name == \"${ruleset_name}\") | .id" 2>/dev/null || echo "")
+  if [ -n "${ruleset_id}" ]; then
+    echo "Removing retired ruleset: ${ruleset_name} (ID: ${ruleset_id})"
+    gh api "repos/${OWNER}/${REPO}/rulesets/${ruleset_id}" --method DELETE >/dev/null
+    echo "  ✓ Removed"
+    echo ""
+  fi
+}
 
-# Create ruleset for develop branch (0 approvals - optional review)
-create_or_update_ruleset "Protect develop" "refs/heads/develop" 0
+# main: PR required, self-merge allowed (0 approvals), no CI gate
+create_or_update_ruleset "Protect main" "refs/heads/main" 0
+
+# develop ruleset is retired (two-tier feature -> main flow)
+remove_ruleset_if_present "Protect develop"
 
 echo "Branch protection setup completed!"
 echo "Please verify the rules in GitHub UI: https://github.com/${OWNER}/${REPO}/rules"
