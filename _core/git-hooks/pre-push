@@ -75,7 +75,31 @@ while read -r local_ref local_sha remote_ref remote_sha; do
 
     printf '[pre-push] anon-audit-deep --range %s (ref %s)\n' "${revspec}" "${local_ref}" >&2
     if ! bash "${scanner}" --range "${revspec}"; then
-        any_leak=1
+        # Try to self-heal only when the operator opted in — a silent
+        # filter-repo pass on every push would be too surprising, and it
+        # can't undo a mis-scoped rewrite.
+        repo_root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+        fixer="${repo_root}/.tooling/local-ci/anon-fix.sh"
+        if [ "${ANON_FIX_AUTO:-0}" = "1" ] && [ -x "${fixer}" ]; then
+            echo "[pre-push] ANON_FIX_AUTO=1 — running anon-fix.sh --auto..." >&2
+            if bash "${fixer}" --range "${revspec}" --auto; then
+                echo "[pre-push] anon-fix succeeded; push proceeds." >&2
+                continue
+            fi
+            echo "[pre-push] anon-fix failed — refusing push." >&2
+            any_leak=1
+        else
+            cat >&2 <<HINT
+
+To scrub the leak in place before push (rewrites the outgoing range
+so the public record shows neither the leak nor a repair scar):
+
+    bash .tooling/local-ci/anon-fix.sh --range ${revspec}
+
+Or export ANON_FIX_AUTO=1 to have this hook do it for you automatically.
+HINT
+            any_leak=1
+        fi
     fi
 done
 
