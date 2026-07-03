@@ -47,29 +47,35 @@ task setup
 ```
 personal-template/
 ├── README.md                     # このファイル (= template 状態の入口)
-├── Taskfile.yml                  # task init のみ (= 派生時に _core/Taskfile.yml で上書き)
+├── Taskfile.yml                  # init / install:core / install:overlay (= 派生時に _core/Taskfile.yml で上書き)
 ├── _core/                        # 言語非依存の共通機構 (全派生で root に昇格)
 │   ├── _README.md
-│   ├── LICENSE / .gitignore / .vscode/
+│   ├── .gitignore / .vscode/
 │   ├── Taskfile.yml              # core task 定義 (= 派生後 root Taskfile.yml になる)
-│   ├── .githooks/pre-commit
+│   ├── .githooks/pre-commit      # repo-local hook (= dispatcher から委譲される側)
+│   ├── git-hooks/                # global hooks dispatcher (= pre-commit / commit-msg / pre-push
+│   │   │                         #   + doctor.sh + install.sh、 マシン全体の関所)
+│   │   └── lib/dispatcher-common.sh
 │   ├── .github/
 │   │   ├── ISSUE_TEMPLATE/
 │   │   └── workflows/anon-check.yml + version-bump.yml
-│   ├── .tooling/local-ci/        # anon-scan.sh / docs-check.sh
+│   ├── .tooling/local-ci/        # anon-scan / anon-fix / anon-audit-deep / anon-sync-truth /
+│   │                             #   docs-check / doctor / audit / clean / lint-versions /
+│   │                             #   version-bump / release-cut / setup-lib
 │   ├── docs/                     # 利用者/contributor 2 層構造 placeholder
-│   ├── scripts/init.sh + setup-branch-protection.sh
+│   ├── scripts/                  # init.py / install-core.sh / install-overlay.sh /
+│   │                             #   post-init-github-settings.sh / setup-branch-protection.sh /
+│   │                             #   gen-third-party-notices.py
 │   ├── personalize.py
 │   └── setup-requirements.txt
 └── _overlays/                    # 言語別 opt-in 機構 (選んだ overlay だけ root に昇格)
     ├── _README.md
-    └── python/                   # 現 revision の唯一 active overlay
+    └── <lang>/                   # python / node / rust / swift / kotlin / csharp の 6 overlay
         ├── _README.md
-        ├── pyproject.toml / pytest.ini / pyinstaller.spec / .flake8 / .coveragerc
-        ├── src/my_package/
-        ├── tests/
-        ├── Taskfile.python.yml
-        └── .tooling/os/<os>/python/
+        ├── (言語別 config: pyproject.toml / package.json / Cargo.toml / ...)
+        ├── src/ + tests/
+        ├── Taskfile.<lang>.yml
+        └── .tooling/os/<os>/<lang>/
 ```
 
 ## 言語選択 (= 6 overlay すべて active)
