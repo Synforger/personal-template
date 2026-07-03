@@ -91,9 +91,15 @@ tasks:
       - bash .tooling/local-ci/docs-check.sh
 
   doctor:
-    desc: Preflight diagnostic — report MISSING / TOO OLD / OK for every toolchain entry
+    desc: Full diagnostic — toolchain floor + hooks/machine armament in one pass
     cmds:
       - bash .tooling/local-ci/doctor.sh
+      - if [ -f git-hooks/doctor.sh ]; then bash git-hooks/doctor.sh; else bash _core/git-hooks/doctor.sh; fi
+
+  bootstrap:machine:
+    desc: Arm this machine end-to-end (dispatcher + word list + binaries + doctor)
+    cmds:
+      - if [ -f scripts/bootstrap-machine.sh ]; then bash scripts/bootstrap-machine.sh; else bash _core/scripts/bootstrap-machine.sh; fi
 
   lint:versions:
     desc: Detect downstream toolchain drift vs .tooling/versions.yaml truth

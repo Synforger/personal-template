@@ -37,3 +37,8 @@ tasks:
       DRY_RUN: '{{.DRY_RUN | default "0"}}'
     cmds:
       - DRY_RUN={{.DRY_RUN}} bash _core/scripts/install-overlay.sh {{.NAME}} {{.TARGET}}
+
+  bootstrap:machine:
+    desc: Arm this machine end-to-end (dispatcher + word list + binaries + doctor)
+    cmds:
+      - bash _core/scripts/bootstrap-machine.sh
