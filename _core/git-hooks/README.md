@@ -16,9 +16,9 @@ that missing setup surfaces as a failed commit rather than a silent gap.
 
 ```
 _core/git-hooks/
-├── pre-commit          — dispatcher
+├── pre-commit          — dispatcher (staged-file scan on Synforger repos)
 ├── commit-msg          — dispatcher (delegate-only for now)
-├── pre-push            — dispatcher (delegate-only for now)
+├── pre-push            — dispatcher (push-range deep scan on Synforger repos)
 ├── lib/
 │   └── dispatcher-common.sh
 └── install.sh
@@ -31,15 +31,18 @@ Every hook follows the same three-step logic:
 1. If the current repo ships `.githooks/<hook-name>`, delegate to it (exec)
    and stop. Repo-local hooks always win.
 2. Otherwise, classify the repo by `origin` URL:
-   - **synforger** — a Synforger GitHub org repo: enforce the baseline
-     (currently: `pre-commit` runs `.tooling/local-ci/anon-scan.sh` on
-     staged files; missing scanner = hard fail).
+   - **synforger** — a Synforger GitHub org repo: enforce the baseline:
+     - `pre-commit` runs `.tooling/local-ci/anon-scan.sh` on staged files.
+     - `pre-push` parses stdin ref ranges and runs
+       `.tooling/local-ci/anon-audit-deep.sh --range <remote>..<local>`
+       on every outgoing branch. New-branch pushes fall back to
+       `origin/<default>..<local>`; delete pushes are skipped.
+     - Missing scanner in either case = hard fail.
    - **no-remote** — treated as "might become synforger", fail-safe.
    - **other** — no-op. Personal, third-party, and unrelated work repos
      are unaffected.
-3. `commit-msg` and `pre-push` currently no-op after delegation. The real
-   push-range scan and commit-message scan land in follow-up PRs (A-2 /
-   A-4 of the anon-defence rework).
+3. `commit-msg` currently no-ops after delegation. The commit-message
+   scan lands in a follow-up PR (package A-4 of the anon-defence rework).
 
 ## Install
 
