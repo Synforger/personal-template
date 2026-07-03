@@ -96,13 +96,25 @@ dispatcher::locate_deep_scanner() {
 }
 
 # Return the name of the default branch (best effort, no origin fetch).
-# Emits the branch name on stdout; falls back to "main" if nothing resolves.
+# Emits the branch name on stdout; falls back to whichever of main/master
+# actually exists on origin, then plain "main" as a last resort.
+#
+# Self-heals when refs/remotes/origin/HEAD is stale (a force-push or a
+# repo rename can leave it pointing at a ref that no longer exists — the
+# original bug that made pre-push scan 22 commits instead of 1).
 dispatcher::default_branch() {
     local ref
     ref="$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null || true)"
-    if [ -n "${ref}" ]; then
+    if [ -n "${ref}" ] && git rev-parse --verify "${ref}" >/dev/null 2>&1; then
         printf '%s' "${ref#origin/}"
         return 0
     fi
+    local candidate
+    for candidate in main master; do
+        if git rev-parse --verify "origin/${candidate}" >/dev/null 2>&1; then
+            printf '%s' "${candidate}"
+            return 0
+        fi
+    done
     printf 'main'
 }
