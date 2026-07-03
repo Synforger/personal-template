@@ -60,10 +60,14 @@ skip_section() {
 
 # ---- anon-scan -------------------------------------------------------------
 
-if [ -x "${SCRIPT_DIR}/anon-scan.sh" ]; then
-    run_section "anon-scan" bash "${SCRIPT_DIR}/anon-scan.sh"
+ANON_SCANNER="${SCRIPT_DIR}/anon-scan.sh"
+if [ ! -x "${ANON_SCANNER}" ] && [ -f "${HOME}/.git-hooks/scanners/anon-scan.sh" ]; then
+    ANON_SCANNER="${HOME}/.git-hooks/scanners/anon-scan.sh"
+fi
+if [ -f "${ANON_SCANNER}" ]; then
+    run_section "anon-scan" bash "${ANON_SCANNER}"
 else
-    skip_section "anon-scan" "scanner not found at ${SCRIPT_DIR}/anon-scan.sh"
+    skip_section "anon-scan" "scanner not found (repo-local or guard-dispatcher)"
 fi
 
 # ---- gitleaks (full-history) -----------------------------------------------

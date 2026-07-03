@@ -39,6 +39,6 @@ tasks:
       - DRY_RUN={{.DRY_RUN}} bash _core/scripts/install-overlay.sh {{.NAME}} {{.TARGET}}
 
   bootstrap:machine:
-    desc: Arm this machine end-to-end (dispatcher + word list + binaries + doctor)
+    desc: Arm this machine (delegates to the guard-dispatcher checkout)
     cmds:
-      - bash _core/scripts/bootstrap-machine.sh
+      - bash "$HOME/.git-hooks/scripts/bootstrap-machine.sh"
