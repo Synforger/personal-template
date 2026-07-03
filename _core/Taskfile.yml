@@ -96,6 +96,11 @@ tasks:
       - bash .tooling/local-ci/doctor.sh
       - if [ -f git-hooks/doctor.sh ]; then bash git-hooks/doctor.sh; else bash _core/git-hooks/doctor.sh; fi
 
+  pr:create:
+    desc: Create a GitHub PR with the title/body anon-scanned first (TITLE= BODY_FILE= [BASE=main])
+    cmds:
+      - if [ -f scripts/pr-create.sh ]; then bash scripts/pr-create.sh --title "{{.TITLE}}" --body-file "{{.BODY_FILE}}" --base "{{.BASE | default "main"}}"; else bash _core/scripts/pr-create.sh --title "{{.TITLE}}" --body-file "{{.BODY_FILE}}" --base "{{.BASE | default "main"}}"; fi
+
   bootstrap:machine:
     desc: Arm this machine end-to-end (dispatcher + word list + binaries + doctor)
     cmds:
