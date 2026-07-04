@@ -1,57 +1,51 @@
 # GitHub Actions policy for this template
 
-**Projects derived from `personal-template` consume GitHub Actions minutes
-only for the anonymity check.** Everything else runs locally via
-`task`.
+Two-tier policy, one implementation:
 
-The intent: AI assisted personal repos need a cheap, fast, local
-feedback loop. CI is reserved for the one check that genuinely cannot
-be enforced locally with the same trust level — namely, that no
-personal identifier or prior-employer org name has slipped into the
-public repo.
+- **The local gate suite is the source of truth.** Every check (lint,
+  tests, docs freshness, version drift, audits) lives in the Taskfile +
+  `.tooling/` and runs offline. Nothing is implemented inside a
+  workflow file.
+- **`ci.yml` is a thin trigger, not a second implementation.** On pull
+  requests it runs the exact same `task ci` the maintainer runs
+  locally, so external contributors get a status check without owning
+  any of the guard machinery.
+- **Visibility guard:** every workflow starts with
+  `if: ${{ !github.event.repository.private }}`. Runner minutes are
+  free on public repositories; on a private repository the workflow
+  refuses to run, so it can never consume the plan's minute quota.
+  While a repo is private (including a repo that will go public
+  later), the trigger is the maintainer's discipline instead: run
+  `task ci` before every merge.
 
 ## What is enabled
 
-(none — the anonymity scan is local-only by design; see below.)
+- `ci.yml` — `task ci` (lint + unit tests + docs:check + lint:versions)
+  on pull requests, public repos only.
+- `version-bump.yml` — shipped disabled (`if: false`); version bumps
+  happen locally via `task version:bump`.
 
-That's it. No matrix tests, no release builds, no version bump
-workflow. Those concerns belong to local `task` commands; see the
-top-level `README.md` for the catalogue.
+## Local-only by design
 
-## Local replacements
+| Concern             | Where it runs                                                        |
+|---------------------|----------------------------------------------------------------------|
+| Anonymity / identity | guard-dispatcher hooks (pre-commit / commit-msg / pre-push) + `task audit:deep` |
+| Dependency audit    | `task audit` (aggregate, on demand / scheduled)                      |
+| Version bump        | `task version:bump`                                                  |
+| Release packaging   | `task release:cut`                                                   |
+| Pre-publication gate | `task publish:check` (full-history audits before flipping private -> public) |
 
-| Concern             | Local replacement                                                  |
-|---------------------|--------------------------------------------------------------------|
-| Unit tests          | `task test:unit`                                                   |
-| Integration tests   | `task test:integration`                                            |
-| Lint + format       | `task lint` (black, flake8, anonymity scan)                        |
-| Anonymity check     | dispatcher hooks (pre-commit / commit-msg / pre-push) + `task audit:deep` |
-| Dependency updates  | manual `pip list --outdated` / `pnpm outdated` / equivalent        |
-| Version bump        | derive a `task version:bump` per project when needed               |
-| Release packaging   | derive a `task release:cut` per project when needed                |
+## Why the anonymity scan can never move to CI
 
-## When to enable more workflows
+CI runs **after** push — for an identity leak that is already too
+late, because the diff is public the moment it lands. Additionally the
+word list is private operator data and is never committed, so CI has
+nothing meaningful to scan against. The pre-push dispatcher deep-scans
+the outgoing range before anything crosses the boundary.
 
-Add workflows only when:
+## Adding more workflows
 
-1. The check genuinely cannot run locally with the same trust (rare
-   — anonymity is the canonical case because human review is bypassed
-   for non-final-commit edits).
-2. The Actions cost is bounded and predictable (e.g. seconds per run,
-   not minutes per push on macOS runners).
-
-For most cases the answer is "do it locally via `task` instead."
-
-## Why the anonymity scan is local-only
-
-The word list is private operator data and is never committed, so CI
-has nothing meaningful to scan against — a CI job would either run
-with an empty placeholder (always green, pure theatre) or require
-publishing the very list the scan exists to protect.
-
-Coverage that used to be claimed by CI is provided locally instead:
-
-- fresh clones / pre-hook history: `task audit:deep` (full-history mode),
-- `--no-verify` bypasses: the global dispatcher runs regardless of
-  repo-local hook state,
-- push boundaries: the pre-push dispatcher deep-scans the outgoing range.
+Keep the invariant: a workflow may only *invoke* `task` verbs that
+also run locally. The moment a check exists only in CI, the local
+suite stops being the source of truth and the repo stops working
+offline.

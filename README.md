@@ -58,6 +58,15 @@ deriving (a `Taskfile.local.yml` include is honoured if you prefer
 keeping them separate). The contract is that every derived repo
 answers to the same verbs; the implementation is yours.
 
+## Why local-first (and where CI fits)
+
+Every gate runs offline on the maintainer's machine — no runner
+minutes, works in forks, and survives any CI pricing change. On public
+repositories a thin `ci.yml` re-runs the exact same `task ci` on pull
+requests as a status-check mirror (free on public repos, and it
+refuses to run on private ones). The checks themselves are never
+implemented in workflow files.
+
 ## Language policy
 
 - `README.md` is English; `README.ja.md` is Japanese. Both link to
