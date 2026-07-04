@@ -69,6 +69,15 @@ commit_docs() {
     [[ "$output" == *"docs/gone"* ]]
 }
 
+@test "tree line with free-text annotation is not split as composite (axis C)" {
+    mkdir -p docs
+    echo "x" > docs/guide.md
+    printf '```\ndocs/\n└── guide.md   ← overview / quick start notes\n```\n' > README.md
+    commit_docs
+    run_docs_check
+    [ "$status" -eq 0 ]
+}
+
 @test "ignore file suppresses a flagged reference" {
     echo 'See `src/gone.py` for details.' > README.md
     echo 'src/gone.py' > .tooling/local-ci/docs-check-ignore.txt
