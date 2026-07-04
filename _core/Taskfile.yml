@@ -87,12 +87,12 @@ tasks:
       - bash .tooling/local-ci/lint-versions.sh
 
   gen-notices:
-    desc: Regenerate THIRD_PARTY_NOTICES.md from the installed dep tree (python + node + rust)
+    desc: Regenerate THIRD_PARTY_NOTICES.md from the installed dep tree (python + node)
     cmds:
       - python3 scripts/gen-third-party-notices.py
 
   audit:
-    desc: Aggregate security audit (anon-scan + gitleaks full history + pip-audit + npm audit + cargo audit)
+    desc: Aggregate security audit (anon-scan + gitleaks full history + pip-audit + npm audit)
     cmds:
       - bash .tooling/local-ci/audit.sh
 
