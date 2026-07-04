@@ -1,85 +1,100 @@
 # personal-template
 
-> 個人公開リポジトリ用の **言語非依存テンプレート**。
-> `_core/` (= 全派生共通の品質機構) を派生時に root へ昇格する形で、
-> `task init` 1 発で派生プロジェクトの足場が完成する。
+> 🇯🇵 日本語版: [README.ja.md](README.ja.md)
 
-## このテンプレが提供するもの
+A **language-neutral quality template** for public personal
+repositories. `task init` promotes `_core/` (the quality machinery
+shared by every derived project) to the repo root and your project
+starts with the full toolchain below already wired.
 
-| カテゴリ | 中身 |
+Living example of a derived repository:
+[claude-code-statusline](https://github.com/Synforger/claude-code-statusline).
+
+## What you get
+
+| category | contents |
 |---|---|
-| **ローカル CI 完結** | `task lint` / `task test:unit` / `task docs:check` で品質ガードが手元で全部走る (= GitHub Actions 課金ゼロ運用) |
-| **匿名性ガード** | [guard-dispatcher](https://github.com/Synforger/guard-dispatcher) (= マシン全体の hooks 関所) が commit / push / PR 境界で個人名 / 業務識別子の混入を機械検出。 本 template は repo 固有 hook (= branch guard + gitleaks) だけを持つ |
-| **secret ガード** | pre-commit hook に gitleaks 同梱、 API key / password / private key の流入を機械検出 |
-| **docs 鮮度ガード** | md 内の path 参照 / `task` 名 / tree 図 / git conflict marker (4 軸) が実態と一致するか機械検証 |
-| **toolchain 真値一元化** | `.tooling/versions.yaml` 1 file で host floor を集約、 `task doctor` で MISSING / TOO OLD / OK を診断、 `task lint:versions` で下流 config drift を検知 |
-| **集約 security audit** | `task audit` で anon-scan + gitleaks 全履歴 + pip-audit + npm audit + cargo audit を 1 発実行、 不在 tool は skip |
-| **per-layer clean** | `task clean LAYER=<layer>` で言語別 build artefact + cache を選択削除 (= python/node/rust/swift/kotlin/cs/docs/all) |
-| **release driver** | `task release:cut LEVEL=patch\|minor\|major` で version bump + commit + tag + push を 1 発、 DRY_RUN=1 で plan 確認 |
-| **公開 OSS 必須要件** | `SECURITY.md` / `ROADMAP.md` / `THIRD_PARTY_NOTICES.md` template 同梱、 後者は `task gen-notices` で自動生成 |
-| **branch protection** | gh CLI で main 保護を 1 発設定 |
-| **対話 personalization** | パッケージ名 / GitHub URL / バージョン等の placeholder を対話的に置換 |
+| **Local-first CI** | `task lint` / `task test:unit` / `task docs:check` run every quality gate on your machine — zero GitHub Actions billing |
+| **Anonymity guard** | [guard-dispatcher](https://github.com/Synforger/guard-dispatcher) (machine-wide hooks gate) machine-checks commits / pushes / PRs for identity leaks; this template ships only the repo-specific hook (branch guard + gitleaks) |
+| **Secret guard** | gitleaks in the pre-commit hook catches API keys, passwords, private keys before they leave the working tree |
+| **Docs freshness guard** | verifies that paths, `task` names, tree diagrams, and conflict markers inside your markdown match reality (4 axes) |
+| **Toolchain single-source** | `.tooling/versions.yaml` holds the host floor; `task doctor` diagnoses MISSING / TOO OLD / OK, `task lint:versions` catches downstream config drift |
+| **Aggregate security audit** | `task audit` runs anon-scan + gitleaks full history + pip-audit + npm audit + cargo audit in one pass, skipping absent tools |
+| **Stack-aware clean** | `task clean` removes build artefacts + caches for whichever stacks are present |
+| **Release driver** | `task release:cut LEVEL=patch\|minor\|major` bumps, commits, tags, and pushes in one command; `DRY_RUN=1` previews |
+| **Public-OSS essentials** | `SECURITY.md` / `ROADMAP.md` / `THIRD_PARTY_NOTICES.md` templates included; the latter regenerates via `task gen-notices` |
+| **Branch protection** | one command applies main-branch protection via the gh CLI |
+| **Interactive personalization** | replaces package name / GitHub URL / version placeholders interactively |
 
-派生プロジェクトは上記機構が全部入った状態でスタートできる。
-
-## 使い方 (= 派生プロジェクト初期化、 4 step)
+## Usage (4 steps)
 
 ```bash
-# 1. このテンプレを「Use this template」 で新 repo 作成 → clone
-gh repo create synforger/<new-project> --template synforger/personal-template --clone
+# 1. Create a new repo from this template, then clone it
+gh repo create <owner>/<new-project> --template Synforger/personal-template --clone
 
-# 2. テンプレ構造を root に展開 (= _core を昇格、 template 残骸を削除)
+# 2. Promote the template structure to the repo root
 cd <new-project>
 task init
 
-# 3. パッケージ名 / GitHub URL / バージョン等を対話設定
+# 3. Set package name / GitHub URL / version interactively
 pip install -r setup-requirements.txt
 python personalize.py
 
-# 4. 開発依存 install + git hooks 配備
+# 4. Install dev dependencies + arm the git hooks
 task setup
 ```
 
-派生後の構造・運用は [`_core/docs/internals/template-usage.md`](_core/docs/internals/template-usage.md) を参照 (= このファイルは `task init` で削除される)。
+See
+[`_core/docs/internals/template-usage.md`](_core/docs/internals/template-usage.md)
+for the post-init structure and workflow (the file is removed by
+`task init`).
 
-## 構造 (= template state)
+## No language scaffolding
+
+This template ships quality machinery only. The stack verbs —
+`task setup / lint / test:unit / test:integration / build / run` —
+are stubs you fill in with your project's real commands after
+deriving (a `Taskfile.local.yml` include is honoured if you prefer
+keeping them separate). The contract is that every derived repo
+answers to the same verbs; the implementation is yours.
+
+## Language policy
+
+- `README.md` is English; `README.ja.md` is Japanese. Both link to
+  each other at the top.
+- User-facing output (`--help`, error messages, CI output) is
+  English.
+- Code comments and internal design notes may be Japanese.
+
+## Structure (template state)
 
 ```
 personal-template/
-├── README.md                     # このファイル (= template 状態の入口)
-├── Taskfile.yml                  # init / install:core (= 派生時に _core/Taskfile.yml で上書き)
-├── _core/                        # 言語非依存の共通機構 (全派生で root に昇格)
-│   ├── _README.md
-│   ├── .gitignore / .vscode/
-│   ├── Taskfile.yml              # core task 定義 (= 派生後 root Taskfile.yml になる)
-│   ├── .githooks/pre-commit      # repo-local hook (= branch guard + gitleaks、 anon baseline は
-│   │                             #   guard-dispatcher が AND 実行)
-│   ├── .github/
-│   │   ├── ISSUE_TEMPLATE/
-│   │   └── workflows/version-bump.yml
-│   ├── .tooling/local-ci/        # docs-check / doctor / audit / clean / lint-versions /
-│   │                             #   version-bump / release-cut / setup-lib (= anon 系 scanner
-│   │                             #   は guard-dispatcher 所管)
-│   ├── docs/                     # 利用者/contributor 2 層構造 placeholder
-│   ├── scripts/                  # init.py / install-core.sh /
-│   │                             #   post-init-github-settings.sh / setup-branch-protection.sh /
-│   │                             #   gen-third-party-notices.py
+├── README.md / README.ja.md     # this file + Japanese counterpart
+├── Taskfile.yml                 # init / install:core (overwritten by _core/Taskfile.yml on init)
+├── _core/                       # language-neutral machinery, promoted to root on init
+│   ├── Taskfile.yml             # core task definitions (becomes the root Taskfile.yml)
+│   ├── .githooks/pre-commit     # repo-local hook (branch guard + gitleaks; the anon
+│   │                            #   baseline runs in guard-dispatcher, AND-composed)
+│   ├── .github/                 # ISSUE_TEMPLATE/ + workflows/version-bump.yml
+│   ├── .tooling/local-ci/       # docs-check / doctor / audit / clean / lint-versions /
+│   │                            #   version-bump / release-cut / setup-lib
+│   ├── docs/                    # two-tier user/contributor docs placeholder
+│   ├── scripts/                 # init.py / install-core.sh / post-init-github-settings.sh /
+│   │                            #   setup-branch-protection.sh / gen-third-party-notices.py
 │   ├── personalize.py
 │   └── setup-requirements.txt
+```
 
+## Design principles
 
-## 言語 scaffolding は同梱しない
-
-本テンプレは言語非依存の品質機構だけを配る。 `task setup / lint / test:unit / test:integration / build / run` は stub として置かれ、 派生後に自分の stack の実 command で埋める (= 別 file にしたい場合は `Taskfile.local.yml` が include される)。 全派生 repo が同じ動詞に応答する統一だけを規約として持つ。
-
-
-## 設計思想
-
-- **構造美の徹底** — 全派生 repo で task 動詞 / file 配置を完全対称化
-- **機能保存** — 既存 personal-template の機構は basically 全部温存、 削除は真に不要なもの (= Sphinx) のみ
-- **追加 cost 最小** — stack 追加は Taskfile stub を埋める + versions.yaml 1 行だけ
-- **言語非依存 core** — anon / docs-check / pre-commit / GitHub workflow / branch protection は全部 `_core/` で共通化
+- **Structural symmetry** — every derived repo answers to the same
+  task verbs and file layout
+- **Minimal adoption cost** — adopting a stack means filling in the
+  Taskfile stubs plus one line in versions.yaml
+- **Language-neutral core** — docs-check, hooks, GitHub workflow,
+  branch protection are all shared via `_core/`
 
 ## License
 
-Apache-2.0 (= [`LICENSE`](LICENSE))
+Apache-2.0 ([`LICENSE`](LICENSE))
