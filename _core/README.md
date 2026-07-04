@@ -26,7 +26,7 @@ task run     # stub を埋めたら有効
 
 ## Documentation
 
-- 利用者向け = [`docs/`](docs/) (= setup / ops / reference)
+- 利用者向け = [`docs/`](docs/) (= setup / troubleshooting / reference)
 - contributor 向け = [`docs/internals/`](docs/internals/)
 
 ## License

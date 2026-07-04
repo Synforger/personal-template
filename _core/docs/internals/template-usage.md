@@ -35,7 +35,7 @@ task setup
 ├── src/my_package/              # Python source 雛形
 ├── tests/                       # pytest 骨格
 ├── docs/                        # 利用者/contributor 2 層構造
-│   ├── README.md / setup/ / ops/ / reference/
+│   ├── README.md / setup/ / troubleshooting/ / reference/
 │   └── internals/               # contributor 専用
 ├── personalize.py               # 派生時の対話 rename
 ├── scripts/setup-branch-protection.sh
