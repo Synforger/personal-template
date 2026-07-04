@@ -12,8 +12,6 @@ the corresponding manifest is absent):
 
 - Python  via `pip-licenses` (= reads the active env's installed packages)
 - Node    via `license-checker-rseidelsohn` (= reads `frontend/` or repo root)
-- Rust    via `cargo license`   (= reads `Cargo.toml`)
-- .NET    via `dotnet list package --include-transitive` (= manual map)
 
 This script is intentionally idempotent: running it twice in succession on
 an unchanged env produces an identical file (`git diff` empty).
@@ -117,36 +115,6 @@ def node_deps() -> list[dict[str, str]]:
     return []
 
 
-def rust_deps() -> list[dict[str, str]]:
-    """Collect Rust deps via cargo license (= JSON output)."""
-    for candidate in [REPO_ROOT]:
-        if (candidate / "Cargo.toml").is_file():
-            if not have("cargo"):
-                return []
-            raw = run(["cargo", "license", "--json"], cwd=candidate)
-            if not raw:
-                # Try installing the subcommand if missing.
-                subprocess.run(["cargo", "install", "--quiet", "cargo-license"], check=False)
-                raw = run(["cargo", "license", "--json"], cwd=candidate)
-            if not raw:
-                return []
-            try:
-                data = json.loads(raw)
-            except json.JSONDecodeError:
-                return []
-            return [
-                {
-                    "package": entry.get("name", ""),
-                    "version": entry.get("version", ""),
-                    "license": entry.get("license", ""),
-                    "source": entry.get("repository", ""),
-                    "lang": "rust",
-                }
-                for entry in data
-                if entry.get("name")
-            ]
-    return []
-
 
 def render(rows: Iterable[dict[str, str]]) -> str:
     rows = sorted(rows, key=lambda r: (r["lang"], r["package"].lower(), r["version"]))
@@ -176,11 +144,10 @@ def main() -> int:
     rows: list[dict[str, str]] = []
     rows.extend(python_deps())
     rows.extend(node_deps())
-    rows.extend(rust_deps())
     if not rows:
         print(
-            "warning: no deps collected (= no Python / Node / Rust env detected).\n"
-            "Run after `task setup` so pip-licenses / npm / cargo see installed deps.",
+            "warning: no deps collected (= no Python / Node env detected).\n"
+            "Run after `task setup` so pip-licenses / npm see installed deps.",
             file=sys.stderr,
         )
         return 1

@@ -29,3 +29,5 @@
 - anon-scan → core (= 言語によらず必要)
 - pyproject.toml → python stack 固有 (= Python でしか使わない)
 - Cargo.toml → rust stack 固有 (= Rust でしか使わない)
+
+**stack 対応は実在する repo が現れた時に足す** (= audit section / versions floor / clean layer の種類先回り追加禁止、 使う日が来たら git history から 1 commit で復活)

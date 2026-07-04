@@ -8,8 +8,8 @@
 # MISSING / TOO OLD / OK with install hints.
 #
 # `task lint:versions` walks downstream config files (pyproject.toml's
-# `requires-python`, package.json's `engines.node`, Cargo.toml's
-# `rust-version`, etc.) and fails if any drift away from the values here.
+# `requires-python`, package.json's `engines.node`) and fails if any
+# drift away from the values here.
 #
 # Notation:
 #   >=X.Y   floor — accept any release at or above this version (default)
@@ -25,11 +25,6 @@
 # =============================================================================
 
 bash:   ">=5.0"      # host
-cmake:  ">=3.27"     # shared build (native stacks + cross-platform steps)
-cs:     ">=8.0"      # csharp (.NET runtime) — keep only the floors your stack uses
 git:    ">=2.40"     # host
-kotlin: ">=1.9"      # kotlin (Gradle 8 系)
 node:   ">=20.0"     # node (Node.js LTS)
 python: ">=3.10"     # personalize.py + docs-check.sh + anon-scan parsing
-rust:   ">=1.75"     # rust (2024 standard)
-swift:  ">=5.9"      # swift (Xcode 15)

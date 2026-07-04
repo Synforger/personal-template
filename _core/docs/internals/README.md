@@ -41,4 +41,4 @@
 
 ## toolchain 真値
 
-`_core/.tooling/versions.yaml` が**host が満たすべき toolchain version の floor 真値**。 派生 repo は新 PC で `task doctor` を叩けば「何 install すべきか」 が出るし、 `versions.yaml` を bump した時は `task lint:versions` で下流 config (= pyproject.toml / package.json / Cargo.toml / global.json) が同期してるか確認できる。 新 stack 追加時は本 file に 1 行追加 + 下流 config を該当 file に書く形 = 真値分散ゼロ。
+`_core/.tooling/versions.yaml` が**host が満たすべき toolchain version の floor 真値**。 派生 repo は新 PC で `task doctor` を叩けば「何 install すべきか」 が出るし、 `versions.yaml` を bump した時は `task lint:versions` で下流 config (= pyproject.toml / package.json) が同期してるか確認できる。 新 stack 追加時は本 file に 1 行追加 + 下流 config を該当 file に書く形 = 真値分散ゼロ。

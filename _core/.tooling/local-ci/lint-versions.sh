@@ -8,8 +8,6 @@
 # Targets (= add new ones when adopting a stack):
 #   - Python   pyproject.toml `requires-python`  vs python
 #   - Node     package.json   `engines.node`     vs node
-#   - Rust     Cargo.toml     `rust-version`     vs rust
-#   - .NET     global.json    `sdk.version`         vs cs
 #
 # Called from:
 #   - `task lint:versions`
@@ -91,32 +89,7 @@ print(m.group(1) if m else "")
     fi
 done
 
-# ---- Rust: Cargo.toml `rust-version` ------------------------------
 
-for cg in Cargo.toml; do
-    if [ -f "${cg}" ]; then
-        rust_pin="$(extract "${cg}" 's/^rust-version *= *"([0-9]+\.[0-9]+(\.[0-9]+)?)".*/\1/p')"
-        require_at_least "${cg} rust-version" "${rust_pin}" "rust"
-    fi
-done
-
-# ---- .NET: global.json sdk.version --------------------------------
-
-for gj in global.json; do
-    if [ -f "${gj}" ]; then
-        cs_pin="$(python3 -c '
-import json, re, sys
-try:
-    data = json.load(open(sys.argv[1]))
-except Exception:
-    sys.exit(0)
-ver = (data.get("sdk") or {}).get("version", "")
-m = re.search(r"([0-9]+\.[0-9]+(\.[0-9]+)?)", ver)
-print(m.group(1) if m else "")
-' "${gj}" 2>/dev/null || true)"
-        require_at_least "${gj} sdk.version" "${cs_pin}" "cs"
-    fi
-done
 
 echo "" >&2
 if [ "${fail_count}" -eq 0 ]; then

@@ -8,7 +8,7 @@
 # accidentally pass empty paths to `rm -rf`.
 #
 # Usage:
-#   task clean LAYER=python|node|rust|swift|kotlin|cs|docs|all
+#   task clean LAYER=python|node|docs|all
 #   # or directly:
 #   bash .tooling/local-ci/clean.sh <layer>
 #
@@ -32,7 +32,7 @@ source "${SCRIPT_DIR}/setup-lib.sh"
 
 LAYER="${1:-${LAYER:-}}"
 if [ -z "${LAYER}" ]; then
-    log_fail "usage: clean.sh <layer>  where layer ∈ python|node|rust|swift|kotlin|cs|docs|all"
+    log_fail "usage: clean.sh <layer>  where layer ∈ python|node|docs|all"
     exit 1
 fi
 
@@ -68,26 +68,6 @@ clean_node() {
                frontend/node_modules frontend/dist frontend/.vite
 }
 
-clean_rust() {
-    log_info "cleaning rust layer"
-    clean_path target Cargo.lock.bak
-}
-
-clean_swift() {
-    log_info "cleaning swift layer"
-    clean_path .build DerivedData Package.resolved.bak
-}
-
-clean_kotlin() {
-    log_info "cleaning kotlin layer"
-    clean_path .gradle build/libs build/classes build/tmp .kotlin
-}
-
-clean_cs() {
-    log_info "cleaning csharp layer"
-    clean_path bin obj artifacts TestResults
-}
-
 clean_docs() {
     log_info "cleaning docs layer"
     clean_path docs/build docs/source/_build site _site
@@ -96,22 +76,14 @@ clean_docs() {
 case "${LAYER}" in
     python) clean_python ;;
     node)   clean_node ;;
-    rust)   clean_rust ;;
-    swift)  clean_swift ;;
-    kotlin) clean_kotlin ;;
-    cs)     clean_cs ;;
     docs)   clean_docs ;;
     all)
         clean_python
         clean_node
-        clean_rust
-        clean_swift
-        clean_kotlin
-        clean_cs
         clean_docs
         ;;
     *)
-        log_fail "unknown layer: ${LAYER} (expected: python|node|rust|swift|kotlin|cs|docs|all)"
+        log_fail "unknown layer: ${LAYER} (expected: python|node|docs|all)"
         exit 1
         ;;
 esac

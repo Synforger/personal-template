@@ -32,11 +32,6 @@ install_hint() {
         git)    echo "brew install git | apt install git" ;;
         python) echo "brew install python@3.12 | apt install python3" ;;
         node)   echo "brew install node | nvm install --lts" ;;
-        rust)   echo "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh" ;;
-        swift)  echo "Install Xcode (App Store) or Swift toolchain from swift.org" ;;
-        kotlin) echo "brew install kotlin | sdk install kotlin" ;;
-        cmake)  echo "brew install cmake | apt install cmake" ;;
-        cs)     echo "brew install --cask dotnet-sdk | apt install dotnet-sdk-8.0" ;;
         *)      echo "(no install hint for $1)" ;;
     esac
 }

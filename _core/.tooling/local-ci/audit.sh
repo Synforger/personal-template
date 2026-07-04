@@ -13,7 +13,6 @@
 #                         `gitleaks protect --staged` mode)
 #   - pip-audit           python: PyPI advisory db check
 #   - npm audit           node: npm advisory db check (production deps)
-#   - cargo audit         rust: RustSec advisory db check
 #
 # Usage:
 #   task audit
@@ -112,18 +111,6 @@ else
     skip_section "npm audit" "node stack not detected (= no package.json at root)"
 fi
 
-# ---- cargo audit (rust) --------------------------------------------------------
-
-if [ -f "${PROJECT_ROOT}/Cargo.toml" ]; then
-    if check_command cargo-audit || check_command cargo; then
-        run_section "cargo audit" \
-            bash -c "cd '${PROJECT_ROOT}' && cargo audit"
-    else
-        skip_section "cargo audit" "neither cargo nor cargo-audit installed"
-    fi
-else
-    skip_section "cargo audit" "rust stack not detected (= no Cargo.toml at root)"
-fi
 
 printf '\n' >&2
 if [ "${overall_fail}" -eq 0 ]; then

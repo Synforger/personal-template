@@ -55,12 +55,6 @@ function Get-PtVersion {
             'git'    { $raw = & git --version 2>$null }
             'python' { $raw = & python --version 2>&1 }
             'node'   { $raw = & node --version 2>$null }
-            'rust'   { $raw = & rustc --version 2>$null }
-            'swift'  { $raw = & swift --version 2>$null | Select-Object -First 1 }
-            'kotlin' { $raw = (& kotlin -version 2>&1) -join "`n" }
-            'cmake'  { $raw = & cmake --version 2>$null | Select-Object -First 1 }
-            'cs'     { $raw = & dotnet --version 2>$null }
-            'dotnet' { $raw = & dotnet --version 2>$null }
             default  { return "" }
         }
     } catch { return "" }
