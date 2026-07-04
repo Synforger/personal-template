@@ -27,5 +27,5 @@
 例:
 - pre-commit hook → core (= 言語によらず必要)
 - anon-scan → core (= 言語によらず必要)
-- pyproject.toml → python overlay (= Python でしか使わない)
-- Cargo.toml → rust overlay (= Rust でしか使わない)
+- pyproject.toml → python stack 固有 (= Python でしか使わない)
+- Cargo.toml → rust stack 固有 (= Rust でしか使わない)

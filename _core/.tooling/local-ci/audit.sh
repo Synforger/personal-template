@@ -13,7 +13,7 @@
 #                         `gitleaks protect --staged` mode)
 #   - pip-audit           python: PyPI advisory db check
 #   - npm audit           node: npm advisory db check (production deps)
-#   - cargo audit         rust overlay: RustSec advisory db check
+#   - cargo audit         rust: RustSec advisory db check
 #
 # Usage:
 #   task audit
@@ -78,7 +78,7 @@ else
     skip_section "gitleaks" "not installed (brew install gitleaks | apt install gitleaks)"
 fi
 
-# ---- pip-audit (python overlay) -------------------------------------------
+# ---- pip-audit (python) ----------------------------------------------------
 
 # NOTE: every language probe below looks ONLY at the post-init layout
 # (= project root or its known sub-dirs like frontend/).
@@ -92,10 +92,10 @@ if [ -f "pyproject.toml" ]; then
         skip_section "pip-audit" "neither pip nor pip-audit available"
     fi
 else
-    skip_section "pip-audit" "python overlay not active (= no pyproject.toml at root)"
+    skip_section "pip-audit" "python stack not detected (= no pyproject.toml at root)"
 fi
 
-# ---- npm audit (node overlay) ---------------------------------------------
+# ---- npm audit (node) --------------------------------------------------------
 
 NODE_DIR=""
 for c in "${PROJECT_ROOT}" "${PROJECT_ROOT}/frontend"; do
@@ -109,10 +109,10 @@ if [ -n "${NODE_DIR}" ]; then
         skip_section "npm audit" "npm not installed"
     fi
 else
-    skip_section "npm audit" "node overlay not active (= no package.json at root)"
+    skip_section "npm audit" "node stack not detected (= no package.json at root)"
 fi
 
-# ---- cargo audit (rust overlay) -------------------------------------------
+# ---- cargo audit (rust) --------------------------------------------------------
 
 if [ -f "${PROJECT_ROOT}/Cargo.toml" ]; then
     if check_command cargo-audit || check_command cargo; then
@@ -122,7 +122,7 @@ if [ -f "${PROJECT_ROOT}/Cargo.toml" ]; then
         skip_section "cargo audit" "neither cargo nor cargo-audit installed"
     fi
 else
-    skip_section "cargo audit" "rust overlay not active (= no Cargo.toml at root)"
+    skip_section "cargo audit" "rust stack not detected (= no Cargo.toml at root)"
 fi
 
 printf '\n' >&2

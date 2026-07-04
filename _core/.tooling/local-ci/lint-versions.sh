@@ -9,7 +9,7 @@
 #   - Python   pyproject.toml `requires-python`  vs python
 #   - Node     package.json   `engines.node`     vs node
 #   - Rust     Cargo.toml     `rust-version`     vs rust
-#   - .NET   overlay   global.json    sdk.version        vs cs
+#   - .NET     global.json    `sdk.version`         vs cs
 #
 # Called from:
 #   - `task lint:versions`
@@ -63,7 +63,7 @@ require_at_least() {
     fi
 }
 
-# ---- Python overlay: pyproject.toml `requires-python` ---------------------
+# ---- Python: pyproject.toml `requires-python` ---------------------
 
 for pp in pyproject.toml; do
     if [ -f "${pp}" ]; then
@@ -72,7 +72,7 @@ for pp in pyproject.toml; do
     fi
 done
 
-# ---- Node overlay: package.json `engines.node` ----------------------------
+# ---- Node: package.json `engines.node` ----------------------------
 
 for pkg in package.json; do
     if [ -f "${pkg}" ]; then
@@ -91,7 +91,7 @@ print(m.group(1) if m else "")
     fi
 done
 
-# ---- Rust overlay: Cargo.toml `rust-version` ------------------------------
+# ---- Rust: Cargo.toml `rust-version` ------------------------------
 
 for cg in Cargo.toml; do
     if [ -f "${cg}" ]; then
@@ -100,7 +100,7 @@ for cg in Cargo.toml; do
     fi
 done
 
-# ---- .NET overlay: global.json sdk.version --------------------------------
+# ---- .NET: global.json sdk.version --------------------------------
 
 for gj in global.json; do
     if [ -f "${gj}" ]; then
