@@ -28,6 +28,11 @@ tasks:
       - TARGET={{.TARGET}} DRY_RUN={{.DRY_RUN}} bash _core/scripts/install-core.sh
 
 
+  test:template:
+    desc: Run the template's own bats suite (brew install bats-core)
+    cmds:
+      - bats tests/
+
   bootstrap:machine:
     desc: Arm this machine (delegates to the guard-dispatcher checkout)
     cmds:

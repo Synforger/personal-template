@@ -95,6 +95,18 @@ personal-template/
 - **Language-neutral core** — docs-check, hooks, GitHub workflow,
   branch protection are all shared via `_core/`
 
+## Tests
+
+The template's own machinery is covered by a bats suite:
+
+```sh
+brew install bats-core   # once
+task test:template       # or: bats tests/
+```
+
+Fixtures build throwaway repos under the test tmpdir — nothing in the
+checkout is mutated.
+
 ## License
 
 Apache-2.0 ([`LICENSE`](LICENSE))

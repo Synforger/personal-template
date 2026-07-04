@@ -88,6 +88,15 @@ personal-template/
 - **追加 cost 最小** — stack 追加は Taskfile stub を埋める + versions.yaml 1 行だけ
 - **言語非依存 core** — anon / docs-check / pre-commit / GitHub workflow / branch protection は全部 `_core/` で共通化
 
+## Tests
+
+テンプレ自身の機構は bats で機械検証している:
+
+```sh
+brew install bats-core   # 初回のみ
+task test:template       # or: bats tests/
+```
+
 ## License
 
 Apache-2.0 (= [`LICENSE`](LICENSE))
