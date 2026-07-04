@@ -74,7 +74,7 @@ tasks:
     desc: Full diagnostic — toolchain floor + hooks/machine armament in one pass
     cmds:
       - bash .tooling/local-ci/doctor.sh
-      - if [ -f git-hooks/doctor.sh ]; then bash git-hooks/doctor.sh; else bash _core/git-hooks/doctor.sh; fi
+      - if [ -f "$HOME/.git-hooks/doctor.sh" ]; then bash "$HOME/.git-hooks/doctor.sh"; else echo "guard-dispatcher not armed on this machine (machine-wide hooks missing)"; fi
 
   pr:create:
     desc: Create a GitHub PR with the title/body anon-scanned first (TITLE= BODY_FILE= [BASE=main], needs guard-dispatcher)
