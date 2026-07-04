@@ -94,7 +94,7 @@ def node_deps() -> list[dict[str, str]]:
             return []
 
     # Search candidate roots for a node project.
-    for candidate in [REPO_ROOT, REPO_ROOT / "frontend", REPO_ROOT / "_overlays" / "node"]:
+    for candidate in [REPO_ROOT, REPO_ROOT / "frontend"]:
         if (candidate / "package.json").is_file():
             raw = run(["license-checker-rseidelsohn", "--json", "--production"], cwd=candidate)
             if not raw:
@@ -119,7 +119,7 @@ def node_deps() -> list[dict[str, str]]:
 
 def rust_deps() -> list[dict[str, str]]:
     """Collect Rust deps via cargo license (= JSON output)."""
-    for candidate in [REPO_ROOT, REPO_ROOT / "_overlays" / "rust"]:
+    for candidate in [REPO_ROOT]:
         if (candidate / "Cargo.toml").is_file():
             if not have("cargo"):
                 return []

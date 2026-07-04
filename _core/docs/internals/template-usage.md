@@ -8,7 +8,7 @@
 # 1. このテンプレを「Use this template」 で新 repo 作成 → clone
 gh repo create synforger/<new-project> --template synforger/personal-template --clone
 
-# 2. テンプレ構造を root に展開 (= _core / _overlays/python を昇格、 不要 dir 削除)
+# 2. テンプレ構造を root に展開 (= _core を昇格、 template 残骸を削除)
 cd <new-project>
 task init
 
@@ -50,18 +50,7 @@ task setup
 
 ## 言語選択 (= 現状)
 
-`task init` は **6 言語 overlay の multiselect** に対応:
-
-| key | prefix | 概要 |
-|---|---|---|
-| python | `py:`     | Python library + CLI (= `src/my_package/`) |
-| node   | `node:`   | Node.js / TypeScript library + CLI (= `src/index.ts`) |
-| rust   | `rust:`   | Rust library (= `src/lib.rs`、 binary 化は派生で `[[bin]]` 追加) |
-| swift  | `swift:`  | SwiftPM library (= `Sources/MySwiftLib/`、 iOS app は Xcode template 別) |
-| kotlin | `kotlin:` | Gradle Kotlin library (= `src/main/kotlin/`、 Android app は AS template 別) |
-| csharp | `cs:`     | .NET class library (= `src/*.csproj`、 Unity/WPF は別 boilerplate) |
-
-`task init` で対話的に複数選択、 または `task init OVERLAYS=python,node,rust` で非対話実行。
+`task init` は `_core/` の昇格 + version reset + template 残骸掃除を行う。 言語 scaffolding は同梱しないので、 昇格後に Taskfile の stack stub を埋める。
 
 ## GitHub settings 1 発復元
 
@@ -77,8 +66,6 @@ cd REDACTED_PATH
 # _core 機構一式
 task install:core TARGET=REDACTED_PATH
 
-# 特定言語 overlay
-task install:overlay NAME=rust TARGET=REDACTED_PATH
 ```
 
 衝突は `<name>.tmpl.orig` backup で残し、 上書きしない (= 手動 merge 用)。 詳細は [`install-to-existing.md`](install-to-existing.md) 参照。

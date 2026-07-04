@@ -16,7 +16,7 @@
 #   X.Y.Z   exact pin — use only where lockstep semantics matter
 #
 # Adding a new language: drop one entry below (alphabetical), mirror it
-# in the overlay's pre-commit lint dispatch + Taskfile.<lang>.yml setup,
+# in your stack's lint / setup tasks,
 # and `task lint:versions` will start enforcing it automatically.
 #
 # Bump targets (= files release-cut.sh rewrites when bumping the project
@@ -25,10 +25,10 @@
 # =============================================================================
 
 bash:   ">=5.0"      # host
-cmake:  ">=3.27"     # shared build (native overlays + cross-platform steps)
-cs:     ">=8.0"      # csharp overlay (.NET runtime, planned PR 6)
+cmake:  ">=3.27"     # shared build (native stacks + cross-platform steps)
+cs:     ">=8.0"      # csharp (.NET runtime) — keep only the floors your stack uses
 git:    ">=2.40"     # host
-kotlin: ">=1.9"      # kotlin overlay (Gradle 8 系, planned PR 6)
+kotlin: ">=1.9"      # kotlin (Gradle 8 系)
 node:   ">=20.0"     # node overlay (Node.js LTS, planned PR 6)
 python: ">=3.10"     # personalize.py + docs-check.sh + anon-scan parsing
 rust:   ">=1.75"     # rust overlay (2024 standard, planned PR 6)

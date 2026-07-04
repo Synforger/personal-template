@@ -5,10 +5,10 @@
 # Walks downstream config files that pin toolchain versions and fails if any
 # diverge from .tooling/versions.yaml.
 #
-# Targets (= add new ones when adding language overlays):
-#   - Python overlay   pyproject.toml `requires-python`  vs python
-#   - Node   overlay   package.json   `engines.node`     vs node
-#   - Rust   overlay   Cargo.toml     `rust-version`     vs rust
+# Targets (= add new ones when adopting a stack):
+#   - Python   pyproject.toml `requires-python`  vs python
+#   - Node     package.json   `engines.node`     vs node
+#   - Rust     Cargo.toml     `rust-version`     vs rust
 #   - .NET   overlay   global.json    sdk.version        vs cs
 #
 # Called from:
@@ -65,7 +65,7 @@ require_at_least() {
 
 # ---- Python overlay: pyproject.toml `requires-python` ---------------------
 
-for pp in pyproject.toml _overlays/python/pyproject.toml; do
+for pp in pyproject.toml; do
     if [ -f "${pp}" ]; then
         py_pin="$(extract "${pp}" 's/^requires-python *= *"[><= ]*([0-9]+\.[0-9]+(\.[0-9]+)?)".*/\1/p')"
         require_at_least "${pp} requires-python" "${py_pin}" "python"
@@ -74,7 +74,7 @@ done
 
 # ---- Node overlay: package.json `engines.node` ----------------------------
 
-for pkg in package.json _overlays/node/package.json; do
+for pkg in package.json; do
     if [ -f "${pkg}" ]; then
         # Tolerate "engines": { "node": ">=20" } across multiple lines.
         node_pin="$(python3 -c '
@@ -93,7 +93,7 @@ done
 
 # ---- Rust overlay: Cargo.toml `rust-version` ------------------------------
 
-for cg in Cargo.toml _overlays/rust/Cargo.toml; do
+for cg in Cargo.toml; do
     if [ -f "${cg}" ]; then
         rust_pin="$(extract "${cg}" 's/^rust-version *= *"([0-9]+\.[0-9]+(\.[0-9]+)?)".*/\1/p')"
         require_at_least "${cg} rust-version" "${rust_pin}" "rust"
@@ -102,7 +102,7 @@ done
 
 # ---- .NET overlay: global.json sdk.version --------------------------------
 
-for gj in global.json _overlays/csharp/global.json; do
+for gj in global.json; do
     if [ -f "${gj}" ]; then
         cs_pin="$(python3 -c '
 import json, re, sys

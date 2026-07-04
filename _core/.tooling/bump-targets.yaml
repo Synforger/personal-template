@@ -4,9 +4,9 @@
 # Single source of truth for the project version + which files
 # `version-bump.sh` / `release-cut.sh` rewrite when the version changes.
 #
-# Active overlays add their own entries during `task init` (= each overlay
+# Add one entry per file that carries your project version. Removing a
 # ships a snippet in its README explaining what to append). Removing an
-# overlay should remove the corresponding entry by hand.
+# stack later means removing its entry here by hand.
 #
 # Placeholders inside search / replace:
 #   {OLD}         = e.g. "0.1.13"
@@ -26,7 +26,7 @@
 current_version: "0.1.13"
 
 targets:
-  # Python overlay: split _MAJOR/_MINOR/_PATCH lines in src/my_package/version.py
+  # Example (python): split _MAJOR/_MINOR/_PATCH lines in src/my_package/version.py
   - file: src/my_package/version.py
     replacements:
       - search: '_MAJOR = "{OLD_MAJOR}"'

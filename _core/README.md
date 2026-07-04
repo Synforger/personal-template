@@ -4,7 +4,7 @@
 
 > 派生時のチェックリスト (= 派生後にこの noprefix README を埋め直す):
 > - [ ] `task doctor` で toolchain floor を満たすか確認
-> - [ ] `task setup` で active overlay の deps install
+> - [ ] Taskfile.yml の stack stub (setup / lint / test / build / run) を自分の stack で埋める
 > - [ ] `python personalize.py` で placeholder 一括置換 (= repo 名 / GitHub URL / バージョン)
 > - [ ] `task init:github` で GitHub settings 1 発復元
 > - [ ] `task lint` `task test:unit` で local CI green
@@ -19,7 +19,7 @@
 ```bash
 # Prerequisites: `task doctor` で diagnose
 task setup
-task run     # 該当 overlay に run task がある場合
+task run     # stub を埋めたら有効
 ```
 
 詳細手順は [`docs/`](docs/) を参照。

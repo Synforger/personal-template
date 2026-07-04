@@ -61,7 +61,7 @@ if command -v task >/dev/null 2>&1; then
     # Template state: collect names from staging Taskfiles as well, so docs
     # written against the post-init layout do not fire spurious "unknown
     # task" hits when this script runs from the template root.
-    for tf in _core/Taskfile.yml _overlays/*/Taskfile.*.yml; do
+    for tf in _core/Taskfile.yml Taskfile.local.yml; do
         [ -f "$tf" ] || continue
         more_names="$(task --list-all --silent --taskfile "$tf" 2>/dev/null || true)"
         if [ -n "${more_names}" ]; then
@@ -81,7 +81,7 @@ EXCLUDE_DIRS = {".git", "node_modules", "dist", "build", ".venv", "venv",
                 "__pycache__", ".next", ".tooling",
                 # Template staging dirs: contents are scanned only after
                 # `task init` promotes them to the repo root.
-                "_core", "_overlays"}
+                "_core"}
 # Look for the ignore file in either the post-init layout (.tooling/local-ci/)
 # or the template-state layout (_core/.tooling/local-ci/).
 IGNORE_FILE = os.path.join(ROOT, ".tooling", "local-ci", "docs-check-ignore.txt")
