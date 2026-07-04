@@ -33,6 +33,42 @@ commit_docs() {
     [ "$status" -ne 0 ]
 }
 
+@test "tree diagram with existing entries passes (axis C)" {
+    mkdir -p docs/setup
+    echo "x" > docs/guide.md
+    printf '```\ndocs/\n├── setup/\n└── guide.md\n```\n' > README.md
+    commit_docs
+    run_docs_check
+    [ "$status" -eq 0 ]
+}
+
+@test "tree diagram with a dead entry fails (axis C)" {
+    mkdir -p docs
+    printf '```\ndocs/\n└── gone.md\n```\n' > README.md
+    commit_docs
+    run_docs_check
+    [ "$status" -ne 0 ]
+}
+
+@test "composite tree line with all entries existing passes (axis C)" {
+    mkdir -p docs/setup docs/reference
+    echo "x" > docs/guide.md
+    printf '```\ndocs/\n├── guide.md / setup/ / reference/\n└── setup/\n```\n' > README.md
+    commit_docs
+    run_docs_check
+    [ "$status" -eq 0 ]
+}
+
+@test "composite tree line with a dead second entry fails (axis C)" {
+    mkdir -p docs/setup
+    echo "x" > docs/guide.md
+    printf '```\ndocs/\n└── guide.md / gone/ / setup/\n```\n' > README.md
+    commit_docs
+    run_docs_check
+    [ "$status" -ne 0 ]
+    [[ "$output" == *"docs/gone"* ]]
+}
+
 @test "ignore file suppresses a flagged reference" {
     echo 'See `src/gone.py` for details.' > README.md
     echo 'src/gone.py' > .tooling/local-ci/docs-check-ignore.txt

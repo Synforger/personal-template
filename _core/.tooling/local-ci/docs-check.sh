@@ -168,22 +168,35 @@ for md in md_files():
                         stack = []  # (depth, name)
                         for i in tree_idx:
                             ln, text = block[i]
-                            m = re.search(r"[├└]─* ?(\S+)", text)
+                            m = re.search(r"[├└]─* ?(.+)$", text)
                             if not m:
                                 continue
                             depth = m.start()  # column of the branch char
-                            name = m.group(1)
-                            if PLACEHOLDER.search(name):
+                            # composite lines list siblings on one line
+                            # ("A / B / C" or "A + B"); drop the trailing
+                            # comment, split on the separators, keep each
+                            # segment's first token
+                            entry = m.group(1).split("#", 1)[0]
+                            names = [seg.split()[0]
+                                     for seg in re.split(r"\s+[/+]\s+", entry)
+                                     if seg.split()]
+                            names = [n for n in names
+                                     if not PLACEHOLDER.search(n)]
+                            if not names:
                                 continue
+                            # first name carries the tree structure
                             stack = [(d, n) for d, n in stack if d < depth]
-                            stack.append((depth, name.rstrip("/")))
-                            full = os.path.join(root_dir,
-                                                *[n for _, n in stack])
-                            if not os.path.exists(os.path.join(ROOT, full)):
-                                if not is_ignored(full):
-                                    findings.append(
-                                        f"{rel_md}:{ln}: tree entry not found:"
-                                        f" {full}")
+                            stack.append((depth, names[0].rstrip("/")))
+                            parent = [n for _, n in stack[:-1]]
+                            for name in names:
+                                full = os.path.join(root_dir, *parent,
+                                                    name.rstrip("/"))
+                                if not os.path.exists(
+                                        os.path.join(ROOT, full)):
+                                    if not is_ignored(full):
+                                        findings.append(
+                                            f"{rel_md}:{ln}: tree entry"
+                                            f" not found: {full}")
                 fence_block = []
                 in_fence = False
             else:
