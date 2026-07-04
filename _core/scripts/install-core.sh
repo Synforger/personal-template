@@ -71,6 +71,16 @@ EXCLUDES=(
     "--exclude=.gitignore"
     "--exclude=_README.md"
     "--exclude=docs/internals/template-usage.md"
+    # template-management tooling: only meaningful inside personal-template
+    # itself (deriving / back-porting), never inside a target repo
+    "--exclude=personalize.py"
+    "--exclude=setup-requirements.txt"
+    "--exclude=scripts/init.py"
+    "--exclude=scripts/install-core.sh"
+    "--exclude=docs/internals/install-to-existing.md"
+    # local build litter
+    "--exclude=__pycache__/"
+    "--exclude=*.pyc"
 )
 
 RSYNC_FLAGS=(-a --backup --suffix=.tmpl.orig "${EXCLUDES[@]}")
