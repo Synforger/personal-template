@@ -24,6 +24,10 @@
 
 派生プロジェクトは上記機構が全部入った状態でスタートできる。 派生実例 = [claude-code-statusline](https://github.com/Synforger/claude-code-statusline) 。
 
+## なぜ local-first か (CI の位置づけ)
+
+全 gate は手元のマシンでオフライン実行できる — runner 分数ゼロ、 fork でも動き、 CI の価格変更に影響されない。 public repo では薄い `ci.yml` が PR ごとに**同じ `task ci`** を再実行して status check の鏡になる (public は無料、 private では実行を拒否する)。 検査の実体を workflow file に実装することはない。
+
 ## Language policy
 
 - `README.md` = 英語、 `README.ja.md` = 日本語 (= 冒頭相互リンク)
