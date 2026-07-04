@@ -8,7 +8,7 @@ tree. Walks the project's active language toolchains and merges per-language
 results into one alphabetical table.
 
 Supported languages (= the script auto-skips a section if the toolchain or
-the corresponding overlay directory is absent):
+the corresponding manifest is absent):
 
 - Python  via `pip-licenses` (= reads the active env's installed packages)
 - Node    via `license-checker-rseidelsohn` (= reads `frontend/` or repo root)
