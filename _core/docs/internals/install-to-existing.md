@@ -26,26 +26,18 @@ find REDACTED_PATH -name '*.tmpl.orig'
 diff -u <orig> <orig>.tmpl.orig    # 元 + 新 の差分
 ```
 
-## `task install:overlay NAME=<lang>` — 特定言語 overlay を install
+## install:core 後の手動 follow-up
 
-```bash
-task install:overlay NAME=rust TARGET=REDACTED_PATH
-```
+target の既存 file 構造に応じて編集が必要なため自動化していない:
+1. `.tooling/bump-targets.yaml` に version file の entry を追記
+2. Taskfile の stack stub (setup / lint / test / build / run) を自分の stack で埋める
+3. `.tooling/versions.yaml` に使う toolchain の floor entry 追加
 
-中身:
-- `_overlays/<lang>/` 配下を target に rsync (= `_README.md` 除く)
-- 衝突は `*.tmpl.orig` backup
-
-**手動 follow-up が必要** (= 自動化困難な理由 = target の既存 file 構造に応じて編集が必要):
-1. `.tooling/bump-targets.yaml` に overlay の bump-targets snippet を追記 (= `_overlays/<lang>/_README.md` § "bump-targets 追加" 参照)
-2. `Taskfile.yml` の `includes:` に `Taskfile.<lang>.yml` への entry 追加
-3. `.tooling/versions.yaml` に overlay の toolchain entry 追加
-
-これらを忘れると新 overlay の task が呼べない / `task lint:versions` で検知されない。
+これらを忘れると `task lint:versions` / release driver が正しく機能しない。
 
 ## 推奨運用
 
-- 既存 repo に**機構全部 1 発持込**したい時 → `task install:core` で base 機構入れる → 必要な言語だけ `task install:overlay` を順次
+- 既存 repo に**機構全部 1 発持込**したい時 → `task install:core`
 - **1 機構だけ持込**したい時 (= 例: docs-check のみ) → `install:core` + 不要 file 削除、 or 該当 file だけ手動 cp
 - 既存 repo の Taskfile / pre-commit hook が違う設計の場合 = `.tmpl.orig` を見て手動マージ、 衝突大きいなら段階的に持ち込む方が現実的
 

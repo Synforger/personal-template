@@ -101,7 +101,7 @@ total_edits = 0
 for entry in data.get("targets") or []:
     file_path = repo_root / entry["file"]
     if not file_path.is_file():
-        print(f"  skip: {entry['file']} not found (overlay inactive?)")
+        print(f"  skip: {entry['file']} not found (stack removed?)")
         continue
     text = file_path.read_text()
     edits = 0

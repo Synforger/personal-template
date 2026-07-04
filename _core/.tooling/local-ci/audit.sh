@@ -4,15 +4,15 @@
 # =============================================================================
 # Runs every available security scanner against the working tree and aggregates
 # exit codes. Each scanner section is skipped (with a warning, not a fail) when
-# the corresponding tool is not on PATH or the corresponding overlay is absent
-# — keeps `task audit` workable in any subset of language overlays.
+# the corresponding tool is not on PATH or the stack is absent — keeps
+# `task audit` workable with any mix of stacks.
 #
 # Scanners (= roughly in fastest-to-slowest order):
 #   - anon-scan           full-tree personal-identifier scan
 #   - gitleaks            full-history secret scan (= deeper than the pre-commit
 #                         `gitleaks protect --staged` mode)
-#   - pip-audit           python overlay: PyPI advisory db check
-#   - npm audit           node overlay: npm advisory db check (production deps)
+#   - pip-audit           python: PyPI advisory db check
+#   - npm audit           node: npm advisory db check (production deps)
 #   - cargo audit         rust overlay: RustSec advisory db check
 #
 # Usage:
@@ -81,11 +81,7 @@ fi
 # ---- pip-audit (python overlay) -------------------------------------------
 
 # NOTE: every language probe below looks ONLY at the post-init layout
-# (= project root or its known sub-dirs like frontend/). `_overlays/<lang>/`
-# paths are intentionally NOT scanned — at template state those dirs hold
-# scaffold material, not an active project, and running e.g. `npm audit`
-# against them fails with ENOLOCK because no lockfile is generated until
-# the overlay is promoted via `task init` and `task setup` runs.
+# (= project root or its known sub-dirs like frontend/).
 
 if [ -f "pyproject.toml" ]; then
     if check_command pip-audit; then

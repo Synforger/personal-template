@@ -1,7 +1,7 @@
 # personal-template
 
 > 個人公開リポジトリ用の **言語非依存テンプレート**。
-> `_core/` (= 全派生共通) + `_overlays/<lang>/` (= 言語別 opt-in) の 2 層構造で、
+> `_core/` (= 全派生共通の品質機構) を派生時に root へ昇格する形で、
 > `task init` 1 発で派生プロジェクトの足場が完成する。
 
 ## このテンプレが提供するもの
@@ -28,7 +28,7 @@
 # 1. このテンプレを「Use this template」 で新 repo 作成 → clone
 gh repo create synforger/<new-project> --template synforger/personal-template --clone
 
-# 2. テンプレ構造を root に展開 (= _core + 選んだ overlay を昇格、 残骸 dir を削除)
+# 2. テンプレ構造を root に展開 (= _core を昇格、 template 残骸を削除)
 cd <new-project>
 task init
 
@@ -47,7 +47,7 @@ task setup
 ```
 personal-template/
 ├── README.md                     # このファイル (= template 状態の入口)
-├── Taskfile.yml                  # init / install:core / install:overlay (= 派生時に _core/Taskfile.yml で上書き)
+├── Taskfile.yml                  # init / install:core (= 派生時に _core/Taskfile.yml で上書き)
 ├── _core/                        # 言語非依存の共通機構 (全派生で root に昇格)
 │   ├── _README.md
 │   ├── .gitignore / .vscode/
@@ -61,45 +61,23 @@ personal-template/
 │   │                             #   version-bump / release-cut / setup-lib (= anon 系 scanner
 │   │                             #   は guard-dispatcher 所管)
 │   ├── docs/                     # 利用者/contributor 2 層構造 placeholder
-│   ├── scripts/                  # init.py / install-core.sh / install-overlay.sh /
+│   ├── scripts/                  # init.py / install-core.sh /
 │   │                             #   post-init-github-settings.sh / setup-branch-protection.sh /
 │   │                             #   gen-third-party-notices.py
 │   ├── personalize.py
 │   └── setup-requirements.txt
-└── _overlays/                    # 言語別 opt-in 機構 (選んだ overlay だけ root に昇格)
-    ├── _README.md
-    └── <lang>/                   # python / node / rust / swift / kotlin / csharp の 6 overlay
-        ├── _README.md
-        ├── (言語別 config: pyproject.toml / package.json / Cargo.toml / ...)
-        ├── src/ + tests/
-        ├── Taskfile.<lang>.yml
-        └── .tooling/os/<os>/<lang>/
-```
 
-## 言語選択 (= 6 overlay すべて active)
 
-`task init` で対話 multiselect、 または `OVERLAYS=` で非対話指定:
+## 言語 scaffolding は同梱しない
 
-| overlay | prefix | 内容 |
-|---|---|---|
-| python | `py:`     | pyproject + pytest + pyinstaller |
-| node   | `node:`   | package.json + tsconfig + vitest + eslint |
-| rust   | `rust:`   | Cargo.toml + lib.rs + cargo test/fmt/clippy |
-| swift  | `swift:`  | SwiftPM library |
-| kotlin | `kotlin:` | Gradle Kotlin library + JUnit 5 |
-| csharp | `cs:`     | .NET 8 class library + xUnit |
+本テンプレは言語非依存の品質機構だけを配る。 `task setup / lint / test:unit / test:integration / build / run` は stub として置かれ、 派生後に自分の stack の実 command で埋める (= 別 file にしたい場合は `Taskfile.local.yml` が include される)。 全派生 repo が同じ動詞に応答する統一だけを規約として持つ。
 
-`task init:github` で template 化で引き継がれない GitHub settings (= secret scanning / PVR / merge config / branch protection) を gh CLI 経由で 1 発復元。
-
-既存 repo への back-port は `task install:core TARGET=<path>` で `_core/` 機構を、 `task install:overlay NAME=<lang> TARGET=<path>` で特定言語 overlay を、 後追い install。 衝突は `*.tmpl.orig` backup で保護、 詳細は [`_core/docs/internals/install-to-existing.md`](_core/docs/internals/install-to-existing.md) 参照。
-
-詳細は [`_overlays/_README.md`](_overlays/_README.md) 参照。
 
 ## 設計思想
 
-- **構造美の徹底** — overlay 間で file 配置 / task 名 / OS スクリプト構造を完全対称化
+- **構造美の徹底** — 全派生 repo で task 動詞 / file 配置を完全対称化
 - **機能保存** — 既存 personal-template の機構は basically 全部温存、 削除は真に不要なもの (= Sphinx) のみ
-- **追加 cost 最小** — 1 overlay = self-contained dir、 言語追加は dir 配備 + versions.yaml 1 行 + Taskfile.<lang>.yml 1 file
+- **追加 cost 最小** — stack 追加は Taskfile stub を埋める + versions.yaml 1 行だけ
 - **言語非依存 core** — anon / docs-check / pre-commit / GitHub workflow / branch protection は全部 `_core/` で共通化
 
 ## License
