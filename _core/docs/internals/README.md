@@ -28,6 +28,7 @@
 - `task lint` — stack の linter (= stub、 派生 repo が Taskfile.local.yml 等で埋める)
 - `task test:unit` — pytest unit
 - `task docs:check` — md 内 path 参照 / `task` 名 / tree 図 / git conflict marker (4 軸) が実態と一致するか機械検証
+- `task docs:coherence` — staledocs による code↔docs ドリフト検証 (= ペア台帳 + アンカー生存 + 網羅ゲート、 config は `.staledocs.yaml`)
 - `task doctor` — `.tooling/versions.yaml` を元に MISSING / TOO OLD / OK を診断
 - `task lint:versions` — 下流 config (= `pyproject.toml` `requires-python` 等) が真値と乖離してないか機械検証
 - `task audit` — anon-scan + gitleaks full history + pip-audit + npm audit + cargo audit を集約 (= 各 tool は不在なら skip)
@@ -37,8 +38,8 @@
 - `task gen-notices` — THIRD_PARTY_NOTICES.md を installed dep tree から再生成
 - `task setup:branch-protection` — main 保護を gh CLI で設定
 
-詳細は `_core/.tooling/local-ci/` 内のスクリプトを参照。
+詳細は `.tooling/local-ci/` 内のスクリプトを参照。
 
 ## toolchain 真値
 
-`_core/.tooling/versions.yaml` が**host が満たすべき toolchain version の floor 真値**。 派生 repo は新 PC で `task doctor` を叩けば「何 install すべきか」 が出るし、 `versions.yaml` を bump した時は `task lint:versions` で下流 config (= pyproject.toml / package.json) が同期してるか確認できる。 新 stack 追加時は本 file に 1 行追加 + 下流 config を該当 file に書く形 = 真値分散ゼロ。
+`.tooling/versions.yaml` が**host が満たすべき toolchain version の floor 真値**。 派生 repo は新 PC で `task doctor` を叩けば「何 install すべきか」 が出るし、 `versions.yaml` を bump した時は `task lint:versions` で下流 config (= pyproject.toml / package.json) が同期してるか確認できる。 新 stack 追加時は本 file に 1 行追加 + 下流 config を該当 file に書く形 = 真値分散ゼロ。

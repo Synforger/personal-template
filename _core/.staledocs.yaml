@@ -1,0 +1,50 @@
+# staledocs — deterministic code<->docs drift detection (docs:coherence gate).
+# Ships in warn mode: declare your pairs as code lands, then flip to strict.
+# Docs: https://github.com/Synforger/staledocs
+version: 1
+
+# warn = report only (onboarding). Flip to strict once `staledocs pairs`
+# shows no unclassified docs / uncovered source — from then on drift blocks CI.
+gate: warn
+
+source:
+  include:
+    - "src/**"
+    - "scripts/**"
+  exclude: []
+
+docs:
+  include:
+    - "docs/**/*.md"
+    - "README.md"
+    - "README.ja.md"
+  exclude:
+    - "docs/internals/**"
+
+# Explicit pairs (CODEOWNERS-style): a doc owns the code its globs match.
+pairs: []
+#  - doc: docs/reference/README.md
+#    code: ["src/**"]
+
+# Convention pairing: docs/<name>.md <-> src/<name>/** or src/<name>.*
+mirror:
+  enabled: true
+  docs_root: docs
+  code_roots: [src]
+
+# Docs with intentionally no code side (setup guides, runbooks).
+standalone:
+  - "docs/README.md"
+  - "docs/setup/**"
+  - "docs/troubleshooting/**"
+  - "docs/reference/**"   # pair this to your code once the API surface exists
+
+# Whole-repo docs: anchor liveness only, no pair ledger.
+global:
+  - README.md
+  - README.ja.md
+
+anchors:
+  min_length: 3
+  ignore: []
+  include_fenced: false

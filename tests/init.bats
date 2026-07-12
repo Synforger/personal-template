@@ -62,3 +62,46 @@ EOF
     run python3 _core/scripts/init.py 2>/dev/null || run python3 scripts/init.py
     [ "$status" -ne 0 ]
 }
+
+@test "init replaces a root file identical to its _core counterpart" {
+    mk_template_repo
+    echo "same content" > "_core/.editorconfig"
+    echo "same content" > ".editorconfig"
+    run python3 _core/scripts/init.py
+    [ "$status" -eq 0 ]
+    grep -q "same content" .editorconfig
+    [ ! -d _core ]
+}
+
+@test "init replaces a root dir identical to its _core counterpart" {
+    mk_template_repo
+    mkdir -p "_core/.githooks" ".githooks"
+    echo "hook body" > "_core/.githooks/pre-commit"
+    echo "hook body" > ".githooks/pre-commit"
+    run python3 _core/scripts/init.py
+    [ "$status" -eq 0 ]
+    grep -q "hook body" .githooks/pre-commit
+}
+
+@test "init lets allowlisted machinery dirs win over divergent root copies" {
+    mk_template_repo
+    mkdir -p ".tooling"
+    echo "template-state stub" > ".tooling/setup-lib.sh"
+    run python3 _core/scripts/init.py
+    [ "$status" -eq 0 ]
+    [ ! -f .tooling/setup-lib.sh ]
+    [ -f .tooling/bump-targets.yaml ]
+}
+
+@test "init drops the template bats suite and Japanese intro README" {
+    mk_template_repo
+    mkdir -p tests
+    echo "bats" > tests/init.bats
+    echo "bats" > tests/helpers.bash
+    echo "intro" > README.ja.md
+    run python3 _core/scripts/init.py
+    [ "$status" -eq 0 ]
+    [ ! -f tests/init.bats ]
+    [ ! -f README.ja.md ]
+    [ ! -d tests ]
+}
