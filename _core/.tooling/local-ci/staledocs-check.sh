@@ -19,8 +19,9 @@ if ! command -v staledocs >/dev/null 2>&1; then
     if [ ! -x "${venv}/bin/staledocs" ]; then
         echo "staledocs-check: staledocs CLI not found; bootstrapping ${venv}"
         python3 -m venv "${venv}"
-        "${venv}/bin/pip" install --quiet staledocs
     fi
+    # keep the cached copy current — a stale venv must not pin old behaviour
+    "${venv}/bin/pip" install --quiet --upgrade staledocs
     PATH="${venv}/bin:${PATH}"
     export PATH
 fi
