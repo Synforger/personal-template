@@ -13,9 +13,15 @@ set -eu
 #   1 = red findings under a strict gate, or missing config
 
 if ! command -v staledocs >/dev/null 2>&1; then
-    echo "staledocs-check: staledocs CLI not found; installing via pip --user"
-    python3 -m pip install --user --quiet staledocs
-    PATH="${PATH}:$(python3 -m site --user-base)/bin"
+    # Dedicated cached venv: immune to PEP 668 (externally-managed pythons
+    # refuse --user installs) and shared across repos on the same machine.
+    venv="${XDG_CACHE_HOME:-${HOME}/.cache}/staledocs/venv"
+    if [ ! -x "${venv}/bin/staledocs" ]; then
+        echo "staledocs-check: staledocs CLI not found; bootstrapping ${venv}"
+        python3 -m venv "${venv}"
+        "${venv}/bin/pip" install --quiet staledocs
+    fi
+    PATH="${venv}/bin:${PATH}"
     export PATH
 fi
 
