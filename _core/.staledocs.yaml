@@ -10,8 +10,14 @@ gate: warn
 source:
   include:
     - "src/**"
-    - "scripts/**"
-  exclude: []
+    # - "scripts/**"   # opt in once your scripts deserve owning docs
+  exclude:
+    # template-shipped machinery is documented in docs/internals (excluded)
+    - "scripts/gen-third-party-notices.py"
+    - "scripts/init.py"
+    - "scripts/install-core.sh"
+    - "scripts/post-init-github-settings.sh"
+    - "scripts/setup-branch-protection.sh"
 
 docs:
   include:
