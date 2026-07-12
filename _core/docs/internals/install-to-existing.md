@@ -10,7 +10,7 @@ task install:core TARGET=REDACTED_PATH
 ```
 
 中身:
-- `_core/` 配下 (= `.tooling/`, `.githooks/`, `.github/workflows/`, `scripts/`, `docs/`, `Taskfile.yml`, `SECURITY.md`, `ROADMAP.md`, `THIRD_PARTY_NOTICES.md`, `personalize.py` 等) を target repo に rsync
+- `_core/` 配下 (= `.tooling/`, `.githooks/`, `.github/workflows/`, `scripts/`, `docs/`, `Taskfile.yml`, `.staledocs.yaml`, `SECURITY.md`, `ROADMAP.md`, `THIRD_PARTY_NOTICES.md`, `personalize.py` 等) を target repo に rsync
 - 既存 file との衝突は `<name>.tmpl.orig` という backup を残して上書き (= 手動 merge 用)
 - `README.md` / `LICENSE` / `.gitignore` は target が持ってる前提で skip
 - `DRY_RUN=1` で実走前 plan 表示

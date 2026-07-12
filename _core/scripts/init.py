@@ -36,11 +36,38 @@ def confirm_layout() -> None:
         pass
 
 
-# Files in _core/ that are expected to overwrite their template-state
-# counterparts at the repo root. README.md + Taskfile.yml at the root are
-# template-only scaffolding (= "use this template" intro + `task init` only)
-# and must be replaced with the derived-repo versions from _core/.
-ALLOW_ROOT_OVERWRITE = {"README.md", "Taskfile.yml"}
+# Paths in _core/ that are expected to overwrite their template-state
+# counterparts at the repo root even when the two differ. The root copies
+# are template-only scaffolding (= "use this template" intro README, the
+# init-only Taskfile, and the template repo's own self-hosted machinery);
+# the _core/ versions are the derived-repo ones and must win.
+ALLOW_ROOT_OVERWRITE = {
+    "README.md",
+    "Taskfile.yml",
+    "THIRD_PARTY_NOTICES.md",
+    ".github",
+    ".tooling",
+}
+
+
+def _identical(a: Path, b: Path) -> bool:
+    """Byte-identical file, or recursively identical directory tree."""
+    if a.is_file() and b.is_file():
+        return a.read_bytes() == b.read_bytes()
+    if a.is_dir() and b.is_dir():
+        names_a = sorted(p.name for p in a.iterdir())
+        names_b = sorted(p.name for p in b.iterdir())
+        if names_a != names_b:
+            return False
+        return all(_identical(a / n, b / n) for n in names_a)
+    return False
+
+
+def _remove(path: Path) -> None:
+    if path.is_dir() and not path.is_symlink():
+        shutil.rmtree(path)
+    else:
+        path.unlink()
 
 
 def promote_core() -> None:
@@ -52,8 +79,13 @@ def promote_core() -> None:
             continue
         dst = REPO_ROOT / path.name
         if dst.exists():
-            if path.name in ALLOW_ROOT_OVERWRITE and dst.is_file():
-                dst.unlink()
+            # The template repo self-hosts its own machinery, so a fresh
+            # copy (GitHub template or local clone) carries root duplicates
+            # of _core/ content. Identical copies are template residue and
+            # are always safe to replace; divergent ones must be explicitly
+            # allowlisted, everything else is treated as user data.
+            if _identical(path, dst) or path.name in ALLOW_ROOT_OVERWRITE:
+                _remove(dst)
             else:
                 fail(f"refusing to overwrite existing {dst.name} at repo root")
         shutil.move(str(path), str(dst))
@@ -78,13 +110,28 @@ def reset_project_version() -> None:
     print("  reset current_version to 0.0.0")
 
 
+# Template-state files _core/ does not ship and a derived repo must not
+# inherit: the template's own bats suite and its Japanese intro README.
+TEMPLATE_ONLY = [
+    "docs/internals/template-usage.md",
+    "README.ja.md",
+    "tests/init.bats",
+    "tests/docs-check.bats",
+    "tests/version-bump.bats",
+    "tests/helpers.bash",
+]
+
+
 def cleanup_template_only_files() -> None:
-    # docs/internals/template-usage.md is template-state guidance, not for
-    # the derived repo.
-    p = REPO_ROOT / "docs" / "internals" / "template-usage.md"
-    if p.exists():
-        p.unlink()
-        print(f"  removed template-only doc {p.relative_to(REPO_ROOT)}")
+    for rel in TEMPLATE_ONLY:
+        p = REPO_ROOT / rel
+        if p.exists():
+            p.unlink()
+            print(f"  removed template-only file {rel}")
+    tests_dir = REPO_ROOT / "tests"
+    if tests_dir.is_dir() and not any(tests_dir.iterdir()):
+        tests_dir.rmdir()
+        print("  removed empty tests/ (template suite only)")
 
 
 def main() -> int:
