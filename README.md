@@ -17,7 +17,8 @@ Living example of a derived repository:
 | **Local-first CI** | `task lint` / `task test:unit` / `task docs:check` run every quality gate on your machine — zero GitHub Actions billing |
 | **Anonymity guard** | [guard-dispatcher](https://github.com/Synforger/guard-dispatcher) (machine-wide hooks gate) machine-checks commits / pushes / PRs for identity leaks; this template ships only the repo-specific hook (branch guard + gitleaks) |
 | **Secret guard** | gitleaks in the pre-commit hook catches API keys, passwords, private keys before they leave the working tree |
-| **Docs freshness guard** | verifies that paths, `task` names, tree diagrams, and conflict markers inside your markdown match reality (4 axes) |
+| **Docs convention guard** | verifies that `task` names, tree diagrams, and conflict markers inside your markdown match reality (3 axes); path/anchor liveness is owned by the coherence gate below |
+| **Docs coherence gate** | [staledocs](https://github.com/Synforger/staledocs) (`task docs:coherence`) detects code↔docs drift deterministically: pair ledger, anchor liveness, coverage, two-step ack |
 | **Toolchain single-source** | `.tooling/versions.yaml` holds the host floor; `task doctor` diagnoses MISSING / TOO OLD / OK, `task lint:versions` catches downstream config drift |
 | **Aggregate security audit** | `task audit` runs anon-scan + gitleaks full history + pip-audit + npm audit + cargo audit in one pass, skipping absent tools |
 | **Stack-aware clean** | `task clean` removes build artefacts + caches for whichever stacks are present |

@@ -27,7 +27,7 @@
 
 - `task lint` — stack の linter (= stub、 派生 repo が Taskfile.local.yml 等で埋める)
 - `task test:unit` — pytest unit
-- `task docs:check` — md 内 path 参照 / `task` 名 / tree 図 / git conflict marker (4 軸) が実態と一致するか機械検証
+- `task docs:check` — md 内 `task` 名 / tree 図 / git conflict marker (3 軸) が実態と一致するか機械検証 (path 参照の生存検証は `task docs:coherence` = staledocs が真値)
 - `task docs:coherence` — staledocs による code↔docs ドリフト検証 (= アンカー格付きペア台帳 + アンカー生存 + 網羅ゲート + config 弱体化検出、 config は `.staledocs.yaml`)。 導入時に `staledocs ack --config -m 'initial baseline'` で config baseline を 1 回記録する。 破れペアの ack は 2 段 (= 証拠 + トークン表示で exit 3 → `--confirm` + 証拠を名指しした note)、 CI の checkout は fetch-depth 0 必須 (= trailer ack が履歴依存)
 - `task doctor` — `.tooling/versions.yaml` を元に MISSING / TOO OLD / OK を診断
 - `task lint:versions` — 下流 config (= `pyproject.toml` `requires-python` 等) が真値と乖離してないか機械検証
