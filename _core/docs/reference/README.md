@@ -9,4 +9,4 @@
 - **api.md** — 公開 API がある場合の reference (= endpoint / params / response / status code)
 - **cli.md** — CLI 提供時の全 sub-command + flag
 
-実装に変更が入ったら必ずここを更新する (= `task docs:check` が path 参照を機械検証してる)。
+実装に変更が入ったら必ずここを更新する (= `task docs:coherence` = staledocs が path 参照を機械検証してる)。

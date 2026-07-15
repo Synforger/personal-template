@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# Tests for .tooling/local-ci/docs-check.sh (docs freshness guard).
+# Tests for .tooling/local-ci/docs-check.sh (docs convention guard).
 
 load helpers
 
@@ -19,11 +19,14 @@ commit_docs() {
     [ "$status" -eq 0 ]
 }
 
-@test "dead inline path reference fails (axis A)" {
+# Inline path liveness is owned by staledocs (task docs:coherence), not by
+# this script — a dead path must NOT fail here, or the two checkers would
+# hand down split verdicts on the same claim.
+@test "dead inline path reference is ignored (owned by staledocs)" {
     echo 'See `src/gone.py` for details.' > README.md
     commit_docs
     run_docs_check
-    [ "$status" -ne 0 ]
+    [ "$status" -eq 0 ]
 }
 
 @test "git conflict marker in docs fails (axis G)" {

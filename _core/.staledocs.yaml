@@ -19,13 +19,14 @@ source:
     - "scripts/post-init-github-settings.sh"
     - "scripts/setup-branch-protection.sh"
 
+# Every tracked .md is in scope: staledocs is the single owner of path/anchor
+# liveness (docs-check.sh deliberately does not verify inline path references).
 docs:
   include:
     - "docs/**/*.md"
-    - "README.md"
-    - "README.ja.md"
-  exclude:
-    - "docs/internals/**"
+    - "*.md"
+    - ".github/**/*.md"
+  exclude: []
 
 # Explicit pairs (CODEOWNERS-style): a doc owns the code its globs match.
 pairs: []
@@ -38,12 +39,20 @@ mirror:
   docs_root: docs
   code_roots: [src]
 
-# Docs with intentionally no code side (setup guides, runbooks).
+# Docs with intentionally no code side (setup guides, runbooks, meta docs).
+# Standalone docs still get their path-like anchors verified repo-wide —
+# that is what replaced docs-check's old inline-path check.
 standalone:
   - "docs/README.md"
   - "docs/setup/**"
   - "docs/troubleshooting/**"
   - "docs/reference/**"   # pair this to your code once the API surface exists
+  - "docs/internals/**"
+  - "CONTRIBUTING.md"
+  - "SECURITY.md"
+  - "ROADMAP.md"
+  - "THIRD_PARTY_NOTICES.md"
+  - ".github/**"
 
 # Whole-repo docs: anchor liveness only, no pair ledger.
 global:
