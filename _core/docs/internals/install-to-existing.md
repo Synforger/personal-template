@@ -32,7 +32,7 @@ target の既存 file 構造に応じて編集が必要なため自動化して�
 1. `.tooling/bump-targets.yaml` に version file の entry を追記
 2. Taskfile の stack stub (setup / lint / test / build / run) を自分の stack で埋める
 3. `.tooling/versions.yaml` に使う toolchain の floor entry 追加
-4. staledocs 初期化: `.staledocs.yaml` の pairs / standalone / global を repo に合わせて宣言 → 2 段 ack で基準線 (= `staledocs ack --all` が証拠 + トークンを出して exit 3 → `--confirm <token> -m 'onboarding baseline'`) → **`staledocs ack --config -m 'initial baseline'` で config baseline 記録** (= 弱体化検出の起点、 忘れると check が黄色い hint を出し続ける)
+4. staledocs 初期化: `staledocs init --suggest` で docs のアンカー由来の pairs 案を印字 (= 提案のみ、 config は書かれない) → レビューして `.staledocs.yaml` に貼り、 standalone / global / 上流 doc 連鎖 (= 設計書の `code:` 側に要件 doc) を整える → 2 段 ack で基準線 (= `staledocs ack --all` が証拠 + トークンを出して exit 3 → `--confirm <token> -m 'onboarding baseline'`) → **`staledocs ack --config -m 'initial baseline'` で config baseline 記録** (= 弱体化検出の起点、 忘れると check が黄色い hint を出し続ける)
 
 これらを忘れると `task lint:versions` / release driver / `task docs:coherence` が正しく機能しない。
 
