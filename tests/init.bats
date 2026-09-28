@@ -105,3 +105,42 @@ EOF
     [ ! -f README.ja.md ]
     [ ! -d tests ]
 }
+
+# --- the repository's name comes from its origin --------------------------------------
+# {{repo_full_name}} / {{repo_name}} / {{maintainer_handle}} are decided by the origin remote;
+# {{repo_description}} and {{threat_model}} are prose, left for the maintainer.
+
+mk_placeholders() {
+    printf '# {{repo_name}}\n\n> {{repo_description}}\n' > _core/README.md
+    printf 'Report at https://github.com/{{repo_full_name}}/security (@{{maintainer_handle}})\n' > _core/SECURITY.md
+}
+
+@test "init fills the repository's name from an https origin and names what is left" {
+    mk_template_repo
+    mk_placeholders
+    git remote add origin https://github.com/example-owner/example-repo.git
+    run python3 _core/scripts/init.py
+    [ "$status" -eq 0 ]
+    grep -qx '# example-repo' README.md
+    grep -q 'github.com/example-owner/example-repo/security (@example-owner)' SECURITY.md
+    grep -q '{{repo_description}}' README.md
+    [[ "$output" == *"left for you to write: {{repo_description}}"* ]]
+}
+
+@test "init reads an ssh origin the same way" {
+    mk_template_repo
+    mk_placeholders
+    git remote add origin git@github.com:example-owner/example-repo.git
+    run python3 _core/scripts/init.py
+    [ "$status" -eq 0 ]
+    grep -qx '# example-repo' README.md
+}
+
+@test "init without an origin leaves the placeholders and says so" {
+    mk_template_repo
+    mk_placeholders
+    run python3 _core/scripts/init.py
+    [ "$status" -eq 0 ]
+    grep -qx '# {{repo_name}}' README.md
+    [[ "$output" == *"no origin remote"* ]]
+}

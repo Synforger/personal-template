@@ -81,20 +81,19 @@ def python_deps() -> list[dict[str, str]]:
 
 def node_deps() -> list[dict[str, str]]:
     """Collect Node deps via license-checker-rseidelsohn (= JSON output)."""
-    if not have("license-checker-rseidelsohn"):
-        if have("npm"):
-            print("info: installing license-checker-rseidelsohn globally", file=sys.stderr)
-            subprocess.run(
-                ["npm", "install", "-g", "--silent", "license-checker-rseidelsohn"],
-                check=False,
-            )
-        if not have("license-checker-rseidelsohn"):
-            return []
+    # An installed checker is used as is; otherwise npx runs it from its own cache, so
+    # nothing is installed machine-wide.
+    if have("license-checker-rseidelsohn"):
+        checker = ["license-checker-rseidelsohn"]
+    elif have("npx"):
+        checker = ["npx", "--yes", "license-checker-rseidelsohn"]
+    else:
+        return []
 
     # Search candidate roots for a node project.
     for candidate in [REPO_ROOT, REPO_ROOT / "frontend"]:
         if (candidate / "package.json").is_file():
-            raw = run(["license-checker-rseidelsohn", "--json", "--production"], cwd=candidate)
+            raw = run([*checker, "--json", "--production"], cwd=candidate)
             if not raw:
                 continue
             try:
@@ -122,7 +121,7 @@ def render(rows: Iterable[dict[str, str]]) -> str:
         "# Third-Party Notices",
         "",
         "This file is **auto-generated** by `task gen-notices` (=",
-        "`_core/scripts/gen-third-party-notices.py`). Do not edit by hand;",
+        f"`{Path(__file__).resolve().relative_to(REPO_ROOT)}`). Do not edit by hand;",
         "re-run the generator and commit the diff.",
         "",
         "| lang | package | version | license | source |",
