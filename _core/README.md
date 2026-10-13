@@ -5,7 +5,7 @@
 > 派生時のチェックリスト (= 派生後にこの noprefix README を埋め直す):
 > - [ ] `task doctor` で toolchain floor を満たすか確認
 > - [ ] Taskfile.yml の stack stub (setup / lint / test / build / run) を自分の stack で埋める
-> - [ ] `python personalize.py` で placeholder 一括置換 (= repo 名 / GitHub URL / バージョン)
+> - [ ] `task init` が埋めない placeholder (= `{{repo_description}}` / `{{threat_model}}`) を書く。 Python のパッケージなら `python personalize.py` (= パッケージ名 / GitHub URL / バージョン)
 > - [ ] `task init:github` で GitHub settings 1 発復元
 > - [ ] `task lint` `task test:unit` で local CI green
 > - [ ] このセクションを削除し、 利用者向け本文に書き換え

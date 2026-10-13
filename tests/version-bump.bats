@@ -77,3 +77,31 @@ PYEOF
     run_version_bump patch
     [ "$status" -ne 0 ]
 }
+
+# The targets file is read without a YAML library, so the reader has to say
+# what it could not understand rather than skip the line: a dropped target
+# rewrites some files and leaves the rest on the old version.
+
+@test "an unknown top-level key is named, not ignored" {
+    write_bump_targets "1.2.3"
+    printf 'bogus_key: 1\n' >> .tooling/bump-targets.yaml
+    run_version_bump patch
+    [ "$status" -ne 0 ]
+    [[ "$output" == *"unexpected top-level line"* ]]
+}
+
+@test "an unknown key inside a target is named, not ignored" {
+    write_bump_targets "1.2.3"
+    printf '  - nonsense: 1\n' >> .tooling/bump-targets.yaml
+    run_version_bump patch
+    [ "$status" -ne 0 ]
+    [[ "$output" == *"unexpected line"* ]]
+}
+
+@test "a search with no replace is refused" {
+    write_bump_targets "1.2.3"
+    printf '      - search: %s\n' "'x'" >> .tooling/bump-targets.yaml
+    run_version_bump patch
+    [ "$status" -ne 0 ]
+    [[ "$output" == *"has no replace"* ]]
+}

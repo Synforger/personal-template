@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import re
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -134,6 +135,45 @@ def cleanup_template_only_files() -> None:
         print("  removed empty tests/ (template suite only)")
 
 
+# Placeholders the repository's own origin decides. {{repo_description}} and {{threat_model}}
+# are prose a person writes, so they are left for the maintainer.
+TEXT_SUFFIXES = {".md", ".yml", ".yaml", ".toml", ".txt", ".json", ".py"}
+
+
+def origin_slug() -> tuple[str, str] | None:
+    """(owner, repo) from the origin URL (https or ssh form), or None without one."""
+    r = subprocess.run(["git", "-C", str(REPO_ROOT), "remote", "get-url", "origin"],
+                       capture_output=True, text=True)
+    m = re.search(r"[/:]([^/:]+)/([^/]+?)(?:\.git)?/?$", r.stdout.strip()) if r.returncode == 0 else None
+    return (m.group(1), m.group(2)) if m else None
+
+
+def fill_repo_placeholders() -> None:
+    slug = origin_slug()
+    if slug is None:
+        print("  no origin remote: fill {{repo_full_name}} / {{repo_name}} / {{maintainer_handle}} by hand")
+        return
+    owner, repo = slug
+    values = {"{{repo_full_name}}": f"{owner}/{repo}", "{{repo_name}}": repo, "{{maintainer_handle}}": owner}
+    for path in REPO_ROOT.rglob("*"):
+        if ".git" in path.parts or not path.is_file() or path.suffix not in TEXT_SUFFIXES:
+            continue
+        try:
+            text = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            continue
+        new = text
+        for key, value in values.items():
+            new = new.replace(key, value)
+        if new != text:
+            path.write_text(new, encoding="utf-8")
+            print(f"  filled {path.relative_to(REPO_ROOT)}")
+    left = sorted({m for p in REPO_ROOT.rglob("*.md") if ".git" not in p.parts
+                   for m in re.findall(r"\{\{[a-z_]+\}\}", p.read_text(encoding="utf-8", errors="replace"))})
+    if left:
+        print(f"  left for you to write: {' '.join(left)}")
+
+
 def main() -> int:
     confirm_layout()
 
@@ -146,10 +186,14 @@ def main() -> int:
     print("==> Removing template-only files")
     cleanup_template_only_files()
 
+    print("==> Filling the repository's name from its origin")
+    fill_repo_placeholders()
+
     print()
     print("==> Template promoted. Next steps:")
-    print("    1. pip install -r setup-requirements.txt && python3 personalize.py")
-    print("    2. Fill in the stack stubs in Taskfile.yml (setup / lint / test / build / run)")
+    print("    1. A Python package: pip install -r setup-requirements.txt && python3 personalize.py")
+    print("    2. Fill in the stack stubs in Taskfile.yml (setup / lint / test / build / run);")
+    print("       CI runs task setup before task ci, so setup installs the dependencies")
     print("       — or keep them in a separate Taskfile.local.yml")
     print("    3. Add your version files to .tooling/bump-targets.yaml targets")
     print("    4. task doctor        (= toolchain preflight)")

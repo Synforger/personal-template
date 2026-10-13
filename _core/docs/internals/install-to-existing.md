@@ -32,8 +32,59 @@ target の既存 file 構造に応じて編集が必要なため自動化して�
 1. `.tooling/bump-targets.yaml` に version file の entry を追記
 2. Taskfile の stack stub (setup / lint / test / build / run) を自分の stack で埋める
 3. `.tooling/versions.yaml` に使う toolchain の floor entry 追加
+4. **LICENSE を置く** (= `install:core` は LICENSE を skip するので、 持っていない repo は持っていないまま残り、 `task publish:check` が落ちる)
 
-これらを忘れると `task lint:versions` / release driver が正しく機能しない。
+これらを忘れると `task lint:versions` / release driver / `publish:check` が正しく機能しない。
+
+### 埋め方の実例 (= python + venv の repo)
+
+`echo` を残さず、 その repo が実際に叩くコマンドを書く。 動詞名は変えない (= 派生がどれも
+同じ動詞に答えることが、 この Taskfile を共有している理由)。
+
+```yaml
+  setup:
+    desc: Create the virtualenv and install the package
+    cmds:
+      - python3 -m venv .venv
+      - .venv/bin/pip install -q -e .
+
+  lint:
+    desc: Compile every source file (= linter を宣言していない repo の syntax gate)
+    cmds:
+      - .venv/bin/python -m compileall -q src
+
+  test:unit:
+    cmds: [.venv/bin/python -m unittest discover -s tests -v]
+
+  build:
+    cmds: [.venv/bin/python -m pip wheel -q --no-deps -w dist .]
+```
+
+version の在処と toolchain の床は、 その repo の実物に合わせる:
+
+```yaml
+# .tooling/bump-targets.yaml
+current_version: "0.1.0"
+targets:
+  - file: pyproject.toml
+    replacements:
+      - search: 'version = "{OLD}"'
+        replace: 'version = "{NEW}"'
+
+# .tooling/versions.yaml — 使わない言語の entry は消す
+python: ">=3.11"     # pyproject の requires-python と一致させる (= lint:versions が突き合わせる)
+```
+
+### 持ち込み直後に出やすい 3 件
+
+- **`task doctor` が repo-local の語リストの drift を言う** — マシン側に master が在る構成では
+  `.tooling/local-ci/anon-words.txt` を消して一本化する (= 2 か所に持つと、 どちらが真値か分からなくなる)
+- **`task docs:check` が repo 名を path と読む** — `` `owner/repo` `` のようにバッククォートで囲むと
+  path 参照として扱われる。 囲まずに書く
+- **README の「次は〜」が完了済みの記述で残る** — 持ち込みと同じ PR で現状に直す
+- **`task version:bump` が `error: PyYAML not installed` で落ちる** — `version-bump.sh` は
+  PyYAML を使うが、 `setup-requirements.txt` にも `doctor` にも宣言が無い。 入れるまで release
+  driver は動かない (= 雛形自身の bats も同じ理由で赤くなる)
 
 ## 推奨運用
 
