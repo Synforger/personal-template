@@ -1,9 +1,8 @@
 # Security Policy
 
-> Replace `{{repo_full_name}}` / `{{maintainer_handle}}` / `{{threat_model}}`
-> placeholders during `python personalize.py`. This file is a template;
-> derived repos should customise the threat model + supported versions
-> sections for their own deployment surface.
+> Write the {{threat_model}} placeholder below for this project. This file is
+> a template; derived repos should customise the threat model + supported
+> versions sections for their own deployment surface.
 
 ## Reporting a vulnerability
 
@@ -18,7 +17,7 @@ Do not file public Issues or PRs for security-relevant findings. Public
 discussion only after a fix has shipped and end users have had time to
 update.
 
-If GitHub access is unavailable, reach `{{maintainer_handle}}` via the
+If GitHub access is unavailable, reach {{maintainer_handle}} via the
 contact channel listed in the repo's README.
 
 ## Supported versions
