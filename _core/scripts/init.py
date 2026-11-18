@@ -22,6 +22,8 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 CORE = REPO_ROOT / "_core"
+# Where this script lands once _core/ is promoted (= the placeholders it fills are named in it, so it is not filled)
+PROMOTED_SELF = REPO_ROOT / Path(__file__).resolve().relative_to(CORE)
 
 
 def fail(msg: str) -> None:
@@ -40,12 +42,14 @@ def confirm_layout() -> None:
 # Paths in _core/ that are expected to overwrite their template-state
 # counterparts at the repo root even when the two differ. The root copies
 # are template-only scaffolding (= "use this template" intro README, the
-# init-only Taskfile, and the template repo's own self-hosted machinery);
+# init-only Taskfile, the template repo's own ignore list, and its own
+# self-hosted machinery);
 # the _core/ versions are the derived-repo ones and must win.
 ALLOW_ROOT_OVERWRITE = {
     "README.md",
     "Taskfile.yml",
     "THIRD_PARTY_NOTICES.md",
+    ".gitignore",
     ".github",
     ".tooling",
 }
@@ -157,6 +161,8 @@ def fill_repo_placeholders() -> None:
     values = {"{{repo_full_name}}": f"{owner}/{repo}", "{{repo_name}}": repo, "{{maintainer_handle}}": owner}
     for path in REPO_ROOT.rglob("*"):
         if ".git" in path.parts or not path.is_file() or path.suffix not in TEXT_SUFFIXES:
+            continue
+        if path == PROMOTED_SELF:
             continue
         try:
             text = path.read_text(encoding="utf-8")

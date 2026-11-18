@@ -1,6 +1,6 @@
 # Third-Party Notices
 
-This file enumerates every OSS dependency `{{repo_full_name}}` ships
+This file enumerates every OSS dependency {{repo_full_name}} ships
 against (= direct + transitive) along with each license. It is
 **auto-generated** by `task gen-notices` (= wraps `pip-licenses`
 for Python and `license-checker-rseidelsohn` for Node). Do not edit

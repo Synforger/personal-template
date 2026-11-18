@@ -144,3 +144,28 @@ mk_placeholders() {
     grep -qx '# {{repo_name}}' README.md
     [[ "$output" == *"no origin remote"* ]]
 }
+
+@test "init leaves its own script as it ships (= the placeholders it fills are not filled in it)" {
+    mk_template_repo
+    git remote add origin https://github.com/example-owner/example-repo.git
+    run python3 _core/scripts/init.py
+    [ "$status" -eq 0 ]
+    cmp -s scripts/init.py "${TEMPLATE_ROOT}/_core/scripts/init.py"
+}
+
+# The whole template, not a fixture: a root file that drifted from its _core/ copy, or a document whose
+# filled name the docs check reads as a path, only shows on the real tree.
+@test "init on a copy of this template succeeds, and the derived repo passes its docs check" {
+    local dir="${BATS_TEST_TMPDIR}/real-${RANDOM}"
+    mkdir -p "${dir}"
+    git -C "${TEMPLATE_ROOT}" ls-files -z | (cd "${TEMPLATE_ROOT}" && xargs -0 tar -cf - --) | tar -xf - -C "${dir}"
+    cd "${dir}" || return 1
+    git init -q .
+    git config core.hooksPath /dev/null
+    git remote add origin git@github.com:example-owner/example-repo.git
+    run python3 _core/scripts/init.py
+    [ "$status" -eq 0 ]
+    git add -A
+    run bash .tooling/local-ci/docs-check.sh
+    [ "$status" -eq 0 ] || { echo "$output" >&3; false; }
+}
