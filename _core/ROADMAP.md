@@ -1,7 +1,6 @@
-# Roadmap — `{{repo_full_name}}`
+# Roadmap — {{repo_full_name}}
 
 > 個人プロジェクトです。 「今安定して使えるのか / 何が作りかけか」 を判断するための一覧。
-> このファイルの `{{repo_full_name}}` は `task init` が origin から埋める。
 
 ## いま使えること
 

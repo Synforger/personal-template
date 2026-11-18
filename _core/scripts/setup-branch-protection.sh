@@ -9,7 +9,9 @@ set -e
 #   - PR required, 0 approvals (= self-merge allowed, but always via PR)
 #   - no required status checks (= quality gates are local: task lint /
 #     task test:unit / dispatcher hooks; CI is intentionally not a gate)
-#   - deletion + force-push blocked; admin bypass kept for emergencies
+#   - deletion + force-push blocked for every account, admin included; an admin
+#     bypasses the rules only through a pull request, so a branch cleanup cannot
+#     delete main or develop
 
 OWNER="${GITHUB_OWNER:-$(gh repo view --json owner -q .owner.login)}"
 REPO="${GITHUB_REPO:-$(gh repo view --json name -q .name)}"
@@ -77,7 +79,7 @@ create_or_update_ruleset() {
     {
       "actor_id": ${REPOSITORY_ADMIN_ROLE_ID},
       "actor_type": "RepositoryRole",
-      "bypass_mode": "always"
+      "bypass_mode": "pull_request"
     }
   ]
 }
