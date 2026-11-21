@@ -29,9 +29,9 @@ tasks:
 
 
   test:template:
-    desc: Run the template's own bats suite (brew install bats-core)
+    desc: Run the template's own bats suite, each test under a time limit, naming the slowest 10 (brew install bats-core)
     cmds:
-      - bats tests/
+      - python3 .tooling/local-ci/run_bats.py tests/
 
   bootstrap:machine:
     desc: Arm this machine (delegates to the guard-dispatcher checkout)

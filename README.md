@@ -110,7 +110,7 @@ The template's own machinery is covered by a bats suite:
 
 ```sh
 brew install bats-core   # once
-task test:template       # or: bats tests/
+task test:template       # or: python3 .tooling/local-ci/run_bats.py tests/
 ```
 
 Fixtures build throwaway repos under the test tmpdir — nothing in the

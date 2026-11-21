@@ -98,7 +98,7 @@ personal-template/
 
 ```sh
 brew install bats-core   # 初回のみ
-task test:template       # or: bats tests/
+task test:template       # or: python3 .tooling/local-ci/run_bats.py tests/
 ```
 
 ## License
