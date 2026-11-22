@@ -11,7 +11,9 @@ pip-wheel-metadata/
 
 # dev tools
 
+.env
 .envrc
+/secrets/
 .python-version
 .idea
 .venv/
