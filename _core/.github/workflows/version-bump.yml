@@ -7,6 +7,8 @@ name: Version Bump (disabled by template)
 # `develop` merges, but as shipped both the trigger and the job-level
 # `if: false` guard keep billable minutes at zero. See
 # `.github/workflows/README.md` for the template policy.
+# Before re-enabling it, give the job only the permissions it needs, and run the
+# pull request it opens through the same checks as any other change.
 on:
   workflow_dispatch:
 
